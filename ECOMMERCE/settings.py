@@ -28,7 +28,6 @@ INSTALLED_APPS = [
 ]
 
 EXTERNAL_APPS = [
-    "phonenumber_field",
 ]
 
 LOCAL_APPS = [

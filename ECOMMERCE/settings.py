@@ -33,6 +33,8 @@ EXTERNAL_APPS = [
 LOCAL_APPS = [
     'core.apps.CoreConfig',
     'store.apps.StoreConfig',
+    'account.apps.AccountConfig',
+    'address.apps.AddressConfig',
 ]
 
 INSTALLED_APPS.extend(EXTERNAL_APPS)

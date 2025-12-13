@@ -28,11 +28,12 @@ INSTALLED_APPS = [
 ]
 
 EXTERNAL_APPS = [
-    
+    "phonenumber_field",
 ]
 
 LOCAL_APPS = [
-    
+    'core.apps.CoreConfig',
+    'store.apps.StoreConfig',
 ]
 
 INSTALLED_APPS.extend(EXTERNAL_APPS)
@@ -49,6 +50,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'ECOMMERCE.urls'
+AUTH_USER_MODEL = 'core.User'
 
 TEMPLATES = [
     {

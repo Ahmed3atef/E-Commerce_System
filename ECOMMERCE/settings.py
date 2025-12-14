@@ -35,6 +35,9 @@ LOCAL_APPS = [
     'store.apps.StoreConfig',
     'account.apps.AccountConfig',
     'address.apps.AddressConfig',
+    'payment.apps.PaymentConfig',
+    'product.apps.ProductConfig',
+    'order.apps.OrderConfig',
 ]
 
 INSTALLED_APPS.extend(EXTERNAL_APPS)

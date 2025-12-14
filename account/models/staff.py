@@ -13,6 +13,7 @@ class StaffProfile(models.Model):
         OPERATIONAL = "operational", "Operational"
         
     user = models.OneToOneField(User,on_delete=models.CASCADE,related_name="staff_profile")
+    # avatar = models.ImageField(upload_to="seller/avatar", blank=True, null=True)
     department = models.CharField(max_length=20, choices=Department.choices)
     job_title = models.CharField(max_length=100)
     employee_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)

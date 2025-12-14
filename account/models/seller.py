@@ -10,6 +10,7 @@ class SellerProfile(models.Model):
         COMPANY = "company", "Company"
     
     user = models.OneToOneField(User,on_delete=models.CASCADE,related_name="seller_profile")
+    # avatar = models.ImageField(upload_to="seller/avatar", blank=True, null=True)
     
     # Onboarding & verification
     seller_type = models.CharField(max_length=20, choices=SellerType.choices)

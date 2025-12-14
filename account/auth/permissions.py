@@ -14,3 +14,10 @@ class IsVerifiedSeller(BasePermission):
             and hasattr(user, "seller_profile")
             and user.seller_profile.is_verified
         )
+
+class IsStaffUser(BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and request.user.is_platform_staff
+        )

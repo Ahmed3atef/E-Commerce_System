@@ -11,7 +11,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     
     #auth
-    path("api/auth/", include("account.urls")),
+    path("api/account/", include("account.urls")),
 ]
 
 if settings.DEBUG:

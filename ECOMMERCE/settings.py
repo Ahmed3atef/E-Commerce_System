@@ -30,6 +30,7 @@ INSTALLED_APPS = [
 
 EXTERNAL_APPS = [
     "rest_framework",
+    "django_filters",
 ]
 
 LOCAL_APPS = [
@@ -143,13 +144,16 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+    ]
 }
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 
-    "AUTH_HEADER_TYPES": ("JWT ",),
+    "AUTH_HEADER_TYPES": ("JWT",),
 
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
 

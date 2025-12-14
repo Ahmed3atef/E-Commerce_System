@@ -1,5 +1,0 @@
-{
-    "git.enableCommitSigning": true,
-    "git.enableSmartCommit": false,
-    "git.postCommitCommand": "sync"
-}

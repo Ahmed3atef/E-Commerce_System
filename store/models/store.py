@@ -12,8 +12,8 @@ class Store(models.Model):
 
     description = models.TextField(blank=True)
     
-    # logo = models.ImageField(upload_to="store/logos", blank=True, null=True)
-    # banner = models.ImageField(upload_to="store/banners", blank=True, null=True)
+    logo = models.ImageField(upload_to="store/logos", blank=True, null=True)
+    banner = models.ImageField(upload_to="store/banners", blank=True, null=True)
     
     # Moderation
     is_active = models.BooleanField(default=True)

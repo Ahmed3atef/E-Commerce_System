@@ -6,7 +6,7 @@ User = settings.AUTH_USER_MODEL
 
 class CustomerProfile(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE,related_name="customer_profile")
-    # avatar = models.ImageField(upload_to="seller/avatar", blank=True, null=True)
+    avatar = models.ImageField(upload_to="seller/avatar", blank=True, null=True)
     
     is_blocked = models.BooleanField(default=False)
     blocked_reason = models.TextField(blank=True)

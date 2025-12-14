@@ -5,16 +5,29 @@ from django.conf import settings
 User = settings.AUTH_USER_MODEL
 
 class SellerProfile(models.Model):
-    class Department(models.TextChoices):
-        MANAGEMENT = "management", "Management"
-        CUSTOMER_CARE = "customer_care", "Customer Care"
-        DELIVERY = "delivery", "Delivery"
-        OPERATIONAL = "operational", "Operational"
-        
+    class SellerType(models.TextChoices):
+        INDIVIDUAL = "individual", "Individual"
+        COMPANY = "company", "Company"
+    
     user = models.OneToOneField(User,on_delete=models.CASCADE,related_name="seller_profile")
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    department = models.CharField(max_length=20,choices=Department.choices)
+    
+    # Onboarding & verification
+    seller_type = models.CharField(max_length=20, choices=SellerType.choices)
+    is_verified = models.BooleanField(default=False)
+    onboarding_completed = models.BooleanField(default=False)
+    verified_at = models.DateTimeField(null=True, blank=True)
+    rejected_reason = models.TextField(blank=True)
+    
+    # Public-facing metadata
+    display_name = models.CharField(max_length=255)
+    support_email = models.EmailField(blank=True)
+    support_phone = models.CharField(max_length=20, blank=True)
+    
+     # Risk control
+    is_suspended = models.BooleanField(default=False)
+    suspended_reason = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f"{self.user.email} - {self.department}"
+        return f"SellerProfile({self.display_name})"

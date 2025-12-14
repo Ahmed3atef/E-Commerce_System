@@ -5,15 +5,19 @@ from django.conf import settings
 User = settings.AUTH_USER_MODEL
 
 class CustomerProfile(models.Model):
-    class Department(models.TextChoices):
-        MANAGEMENT = "management", "Management"
-        CUSTOMER_CARE = "customer_care", "Customer Care"
-        DELIVERY = "delivery", "Delivery"
-        OPERATIONAL = "operational", "Operational"
-        
     user = models.OneToOneField(User,on_delete=models.CASCADE,related_name="customer_profile")
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
     
+    is_blocked = models.BooleanField(default=False)
+    blocked_reason = models.TextField(blank=True)
+
+    preferred_language = models.CharField(
+        max_length=10,
+        default="en"
+    )
+
+    marketing_opt_in = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
-        return f"{self.user.email} - {self.department}"
+        return f"CustomerProfile({self.user})"

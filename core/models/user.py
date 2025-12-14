@@ -55,28 +55,26 @@ class User(AbstractUser):
     is_phone_verified = models.BooleanField(default=False)
     role = models.CharField(
         max_length=20,
-        choices = Role.choices,
+        choices=Role.choices,
         default=Role.CUSTOMER
-        
     )
 
-    # make email-based auth
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = [] # username removed
-    
+    REQUIRED_FIELDS = []
+
     objects = CustomUserManager()
-    
+
     def __str__(self):
         return self.email
-    
+
     @property
-    def is_staff_member(self):
-        return self.role == self.Role.STAFF or self.is_staff
-    
+    def is_platform_staff(self):
+        return self.role == self.Role.STAFF
+
     @property
     def is_seller(self):
         return self.role == self.Role.SELLER
-    
+
     @property
     def is_customer(self):
         return self.role == self.Role.CUSTOMER

@@ -13,3 +13,12 @@ dependencies = [
     "psycopg2-binary>=2.9.11",
     "pycountry>=24.6.1",
 ]
+
+[dependency-groups]
+dev = [
+    "django-debug-toolbar>=6.1.0",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "pytest-django>=4.11.1",
+    "pytest-watch>=4.2.0",
+]

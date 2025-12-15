@@ -30,5 +30,10 @@ class SellerProfile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    class Meta:
+        indexes = [
+            models.Index(fields=["is_verified", "is_suspended"]),
+        ]
+    
     def __str__(self):
         return f"SellerProfile({self.display_name})"

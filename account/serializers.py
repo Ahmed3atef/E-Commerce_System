@@ -25,7 +25,6 @@ class MeSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["email", "is_phone_verified"]
 
-
 class AdminUserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -76,3 +75,16 @@ class UserDetailSerializer(serializers.ModelSerializer):
                 "is_verified": obj.seller_profile.is_verified,
             }
         return None
+    
+class SellerListSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(source = "user.email", read_only=True)
+    
+    class Meta:
+        model = SellerProfile
+        fields = [
+            "id",
+            "email",
+            "display_name",
+            "is_verified",
+            "approved_at",
+        ]

@@ -1,13 +1,15 @@
+from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.filters import OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from account.models.seller import SellerProfile
 from core.models import User
-from .serializers import AdminUserUpdateSerializer, UserListSerializer, UserDetailSerializer, MeSerializer
+from .serializers import AdminUserUpdateSerializer, SellerListSerializer, UserListSerializer, UserDetailSerializer, MeSerializer
 from rest_framework.permissions import IsAuthenticated
-from account.auth.permissions import IsStaffUser
+from account.auth.permissions import IsPlatformStaff, IsStaffUser
 
     
 class MeView(APIView):
@@ -42,3 +44,32 @@ class UserViewSet(ModelViewSet):
         elif self.action in ["update", "partial_update"]:
             return AdminUserUpdateSerializer
         return UserListSerializer
+
+
+class SellerAdminViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = SellerProfile.objects.select_related("user").all()
+    serializer_class = SellerListSerializer
+    permission_classes = [IsPlatformStaff]
+    
+    filterset_fields = ["is_verified"]
+    ordering_fields = ["approved_at", "user__email"]
+    
+    @action(detail=True, methods=["post"])
+    def approve(self, request, pk=None):
+        seller = self.get_object()
+
+        if seller.is_verified:
+            return Response(
+                {"detail": "Seller already approved."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        seller.is_verified = True
+        seller.approved_at = timezone.now()
+        seller.save()
+
+        return Response(
+            {"detail": "Seller approved successfully."},
+            status=status.HTTP_200_OK,
+        )
+    

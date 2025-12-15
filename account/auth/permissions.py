@@ -31,3 +31,10 @@ class IsManagementStaff(BasePermission):
             and hasattr(user, "staff_profile")
             and user.staff_profile.department == "management"
         )
+
+class IsPlatformStaff(BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and request.user.is_platform_staff
+        )

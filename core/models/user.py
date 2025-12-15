@@ -53,6 +53,7 @@ class User(AbstractUser):
         ]
     )
     is_phone_verified = models.BooleanField(default=False)
+    is_2fa_enabled = models.BooleanField(default=False)
     role = models.CharField(
         max_length=20,
         choices=Role.choices,

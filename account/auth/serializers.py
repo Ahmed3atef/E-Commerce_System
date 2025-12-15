@@ -61,3 +61,11 @@ class RegisterResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "email", "role"]
+
+class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(read_only=True)
+    role = serializers.CharField(read_only=True)
+    is_phone_verified = serializers.BooleanField(read_only=True)
+    class Meta:
+        model = User
+        fields = ["email", "phone", "is_2fa_enabled", "is_phone_verified", "role"]

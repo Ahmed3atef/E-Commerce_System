@@ -36,6 +36,7 @@ EXTERNAL_APPS = [
     "django_filters",
     'debug_toolbar',
     'drf_spectacular',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 LOCAL_APPS = [

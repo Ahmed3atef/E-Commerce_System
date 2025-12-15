@@ -79,6 +79,12 @@ def refresh_endpoint(api_client):
             return  api_client.post('/api/account/auth/refresh/', payload)
     return request_has_payload
 
+@pytest.fixture
+def logout_endpoint(api_client):
+    def request_has_payload(payload):
+            return  api_client.post('/api/account/auth/logout/', payload)
+    return request_has_payload
+
 @pytest.mark.django_db
 class TestLoginAuth:
     
@@ -109,4 +115,18 @@ class TestLoginAuth:
         
         assert response.status_code == status.HTTP_200_OK
         assert 'access' in response.data
+    
+    def test_logout_endpoint(self, api_client, db_user, login_endpoint, refresh_endpoint):
+        
+        body = {
+            "email": "seller@test.com",
+            "password": "StrongPass123"
+        }
+        
+        payload = {
+            "refresh": login_endpoint(body).data.get("refresh")
+        }
+        response = refresh_endpoint(payload)
+        
+        assert response.status_code == status.HTTP_200_OK
         

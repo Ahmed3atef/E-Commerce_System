@@ -35,6 +35,7 @@ EXTERNAL_APPS = [
     "rest_framework",
     "django_filters",
     'debug_toolbar',
+    'drf_spectacular',
 ]
 
 LOCAL_APPS = [
@@ -151,7 +152,8 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
-    ]
+    ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SIMPLE_JWT = {
@@ -164,4 +166,13 @@ SIMPLE_JWT = {
 
     "USER_ID_FIELD": "id",
     "USER_ID_CLAIM": "user_id",
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'E-Commerce System API',
+    'DESCRIPTION': 'API documentation for the E-Commerce System',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
 }

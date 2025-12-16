@@ -68,40 +68,32 @@ class TestRegisterAuth:
 
 
 @pytest.fixture
-def login_endpoint(api_client):
-    def request_has_payload(payload):
+def auth_endpoints(api_client):
+    def login_endpoint(payload):
             return  api_client.post('/api/account/auth/login/', payload)
-    return request_has_payload
-
-@pytest.fixture
-def refresh_endpoint(api_client):
-    def request_has_payload(payload):
+    def refresh_endpoint(payload):
             return  api_client.post('/api/account/auth/refresh/', payload)
-    return request_has_payload
-
-@pytest.fixture
-def logout_endpoint(api_client):
-    def request_has_payload(payload):
+    def logout_endpoint(payload):
             return  api_client.post('/api/account/auth/logout/', payload)
-    return request_has_payload
+    return {"login": login_endpoint, "refresh": refresh_endpoint, "logout": logout_endpoint}
 
 @pytest.mark.django_db
 class TestLoginAuth:
     
-    def test_login_customer_user_200(self, api_client,db_user, login_endpoint):
+    def test_login_customer_user_200(self, api_client,db_user, auth_endpoints):
         
         body = {
             "email": "seller@test.com",
             "password": "StrongPass123"
         }
         
-        response = login_endpoint(body)
+        response = auth_endpoints["login"](body)
         
         assert response.status_code == status.HTTP_200_OK
         assert 'access' in response.data  # JWT access token
         assert 'refresh' in response.data  # JWT refresh token
     
-    def test_refresh_endpoint(self,api_client,db_user, login_endpoint, refresh_endpoint):
+    def test_refresh_endpoint(self,api_client,db_user, auth_endpoints):
         
         body = {
             "email": "seller@test.com",
@@ -109,14 +101,14 @@ class TestLoginAuth:
         }
         
         payload = {
-            "refresh": login_endpoint(body).data.get("refresh")
+            "refresh": auth_endpoints["login"](body).data.get("refresh")
         }
-        response = refresh_endpoint(payload)
+        response = auth_endpoints["refresh"](payload)
         
         assert response.status_code == status.HTTP_200_OK
         assert 'access' in response.data
     
-    def test_logout_endpoint(self, api_client, db_user, login_endpoint, refresh_endpoint):
+    def test_logout_endpoint(self, api_client, db_user, auth_endpoints):
         
         body = {
             "email": "seller@test.com",
@@ -124,9 +116,70 @@ class TestLoginAuth:
         }
         
         payload = {
-            "refresh": login_endpoint(body).data.get("refresh")
+            "refresh": auth_endpoints["login"](body).data.get("refresh")
         }
-        response = refresh_endpoint(payload)
+        response = auth_endpoints["logout"](payload)
         
         assert response.status_code == status.HTTP_200_OK
+             
         
+@pytest.fixture
+def me_endpoint(api_client):
+    def get_method(body={}, token=None):
+        if token:
+            api_client.credentials(HTTP_AUTHORIZATION=f'JWT {token}')
+        return  api_client.get('/api/account/users/me/')
+    def post_method(body={}, token=None):
+        if token:
+            api_client.credentials(HTTP_AUTHORIZATION=f'JWT {token}')
+        return  api_client.post('/api/account/users/me/', body)
+    def put_method(body={}, token=None):
+        if token:
+            api_client.credentials(HTTP_AUTHORIZATION=f'JWT {token}')
+        return  api_client.put('/api/account/users/me/', body)
+    def patch_method(body={}, token=None):
+        if token:
+            api_client.credentials(HTTP_AUTHORIZATION=f'JWT {token}')
+        return  api_client.patch('/api/account/users/me/', body)
+    return {"get": get_method, "post": post_method, "put": put_method, "patch": patch_method}
+
+@pytest.mark.django_db
+class TestMeView:
+    
+    def test_me_endpoint_get_200(self, api_client, db_user, me_endpoint, auth_endpoints):
+        login_body = {
+            "email": "seller@test.com",
+            "password": "StrongPass123"
+        }
+        
+        login_response = auth_endpoints["login"](login_body)
+        access_token = login_response.data.get("access")
+        
+        response = me_endpoint["get"]({}, access_token)
+        assert response.status_code == status.HTTP_200_OK
+    
+    def test_me_endpoint_put_200(self, api_client, db_user, me_endpoint, auth_endpoints):
+        login_body = {
+            "email": "seller@test.com",
+            "password": "StrongPass123"
+        }
+        
+        login_response = auth_endpoints["login"](login_body)
+        access_token = login_response.data.get("access")
+        
+        response = me_endpoint["put"]({"phone": "+201234567890"}, access_token)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data.get("phone") == "+201234567890"
+        
+    def test_me_endpoint_patch_200(self, api_client, db_user, me_endpoint, auth_endpoints):
+        login_body = {
+            "email": "seller@test.com",
+            "password": "StrongPass123"
+        }
+        
+        login_response = auth_endpoints["login"](login_body)
+        access_token = login_response.data.get("access")
+        
+        response = me_endpoint["patch"]({"phone": "+201234567890"}, access_token)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data.get("phone") == "+201234567890"    

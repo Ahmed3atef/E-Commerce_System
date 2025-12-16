@@ -127,8 +127,8 @@ class ForgotPasswordView(APIView):
             token = default_token_generator.make_token(self.user)
             uid = urlsafe_base64_encode(force_bytes(self.user.pk))
             
-            reset_path = reverse("auth:auth-reset-password")
-            reset_link = f"{request.build_absolute_uri(reset_path)}{uid}/{token}/"
+            reset_path = reverse("auth:auth-reset-password", kwargs={"uid": uid, "token": token})
+            reset_link = f"{request.build_absolute_uri(reset_path)}"
             
             send_mail(
                 'Password Reset',
@@ -146,13 +146,21 @@ class ResetPasswordView(APIView):
         request=ResetPasswordSerializer,
         responses={200: UserSerializer}
     )
-    def post(self, request, uidb64, token):
-        serializer = ResetPasswordSerializer(data=request.data)
+    def get(self, request, uid, token):
+        return Response({'uid': uid, 'token': token})
+    
+    @extend_schema(
+        request=ResetPasswordSerializer,
+        responses={200: UserSerializer}
+    )
+    def post(self, request, uid, token):
+        data = request.data.copy()
+        data['uid'] = uid
+        data['token'] = token
+        
+        serializer = ResetPasswordSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         
-        self.user = getattr(serializer, "user", None)
-        if self.user:
-            self.user.set_password(serializer.validated_data["password"])
-            self.user.save()
+        serializer.save() 
         return Response({"message": "Password reset successful"})
 

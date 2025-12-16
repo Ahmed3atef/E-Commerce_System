@@ -156,8 +156,7 @@ class ResetPasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError({"password": "Passwords do not match"})
         return attrs
     
-    def update(self, instance, validated_data):
-        instance.set_password(validated_data["password"])
-        instance.save()
-        return instance
-    
+    def save(self, **kwargs):
+        self.user.set_password(self.validated_data["password"])
+        self.user.save()
+        return self.user

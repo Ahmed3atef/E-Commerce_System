@@ -69,3 +69,24 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["email", "phone", "is_2fa_enabled", "is_phone_verified", "role"]
+        
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(write_only=True, min_length=8, style={"input_type": "password"})
+    new_password = serializers.CharField(write_only=True, min_length=8, style={"input_type": "password"})
+    new_password2 = serializers.CharField(write_only=True, style={"input_type": "password"})
+    
+    def validate(self, attrs):
+        if  not self.context["request"].user.check_password(attrs["old_password"]):
+            raise serializers.ValidationError({"old_password": "Old password is incorrect"})
+        if attrs["new_password"] != attrs["new_password2"]:
+            raise serializers.ValidationError({"new_password": "Passwords do not match"})
+        return attrs
+    
+    def update(self, instance, validated_data):
+        instance.set_password(validated_data["new_password"])
+        instance.save()
+        return instance
+    
+    class Meta:
+        model = User
+        fields = ["old_password", "new_password", "new_password2"]

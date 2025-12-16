@@ -143,6 +143,14 @@ def me_endpoint(api_client):
         return  api_client.patch('/api/account/users/me/', body)
     return {"get": get_method, "post": post_method, "put": put_method, "patch": patch_method}
 
+@pytest.fixture
+def change_password_endpoint(api_client):
+    def request_has_body(body={}, token=None):
+        if token:
+            api_client.credentials(HTTP_AUTHORIZATION=f'JWT {token}')
+        return api_client.post('/api/account/auth/change-password/', body)
+    return request_has_body
+
 @pytest.mark.django_db
 class TestMeView:
     
@@ -183,3 +191,23 @@ class TestMeView:
         response = me_endpoint["patch"]({"phone": "+201234567890"}, access_token)
         assert response.status_code == status.HTTP_200_OK
         assert response.data.get("phone") == "+201234567890"    
+        
+    def test_change_password_endpoint_200(self, api_client, db_user, change_password_endpoint, auth_endpoints):
+        login_body = {
+            "email": "seller@test.com",
+            "password": "StrongPass123"
+        }
+        
+        login_response = auth_endpoints["login"](login_body)
+        access_token = login_response.data.get("access")
+        
+        body = {"old_password": "StrongPass123", 
+                "new_password": "NewPass123", 
+                "new_password2": "NewPass123"}
+        
+        response = change_password_endpoint(body, access_token)
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data.get("email") == "seller@test.com"
+        assert response.data.get("role") == "seller"
+        assert response.data.get("is_phone_verified") == False

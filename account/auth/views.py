@@ -1,9 +1,13 @@
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import CustomTokenObtainPairSerializer, RegisterResponseSerializer, RegisterSerializer, UserSerializer
+from .serializers import (CustomTokenObtainPairSerializer, 
+                          RegisterResponseSerializer, 
+                          RegisterSerializer, 
+                          UserSerializer,
+                          ChangePasswordSerializer)
 from django.contrib.auth import get_user_model
 from drf_spectacular.utils import extend_schema
 
@@ -36,6 +40,7 @@ class RegisterView(APIView):
         )
         
 class MeView(APIView):
+    permission_classes = [IsAuthenticated]
     
     @extend_schema(
         responses={200: UserSerializer}
@@ -64,3 +69,17 @@ class MeView(APIView):
         serializer.save()
         return Response(serializer.data)
 
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    @extend_schema(
+        request=ChangePasswordSerializer,
+        responses={200: UserSerializer}
+    )
+    def post(self, request):
+        serializer = ChangePasswordSerializer(request.user, data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        response_serializer = UserSerializer(request.user)
+        return Response(response_serializer.data,
+                        status=status.HTTP_200_OK)

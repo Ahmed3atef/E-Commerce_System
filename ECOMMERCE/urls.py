@@ -12,6 +12,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     
     #auth
+    path("api/auth/", include("account.auth.urls")),
     path("api/account/", include("account.urls")),
     
     # Swagger / OpenAPI

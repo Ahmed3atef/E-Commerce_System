@@ -42,6 +42,26 @@ def auth_endpoints(api_client):
 
 
 @pytest.fixture
+def me_endpoint(api_client):
+    def get_method(body={}, token=None):
+        if token:
+            api_client.credentials(HTTP_AUTHORIZATION=f'JWT {token}')
+        return  api_client.get(reverse("account:user-me"))
+    def post_method(body={}, token=None):
+        if token:
+            api_client.credentials(HTTP_AUTHORIZATION=f'JWT {token}')
+        return  api_client.post(reverse("account:user-me"), body)
+    def put_method(body={}, token=None):
+        if token:
+            api_client.credentials(HTTP_AUTHORIZATION=f'JWT {token}')
+        return  api_client.put(reverse("account:user-me"), body)
+    def patch_method(body={}, token=None):
+        if token:
+            api_client.credentials(HTTP_AUTHORIZATION=f'JWT {token}')
+        return  api_client.patch(reverse("account:user-me"), body)
+    return {"get": get_method, "post": post_method, "put": put_method, "patch": patch_method}
+
+@pytest.fixture
 def change_password_endpoint(api_client):
     def request_has_body(body={}, token=None):
         if token:
@@ -49,15 +69,9 @@ def change_password_endpoint(api_client):
         return api_client.post(reverse("auth:auth-change-password"), body)
     return request_has_body
 
+
 @pytest.fixture
-def email_verification_endpoints(api_client):
-    def email_verify(body={}):
-        return api_client.post(reverse("auth:auth-verify-email"), body)
-    def email_confirm(uid, token):
-        return api_client.get(reverse("auth:auth-confirm-email", args=[uid, token]))
-    return {"email_verify": email_verify, "email_confirm": email_confirm}
-
-
+def users_stuff_endpoint(api_client):
     def get_list(token=None):
         if token:
             api_client.credentials(HTTP_AUTHORIZATION=f'JWT {token}')

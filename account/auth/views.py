@@ -52,48 +52,6 @@ class RegisterView(APIView):
             status=status.HTTP_201_CREATED
         )
  
-@extend_schema(
-    responses={200: UserSerializer(many=True)}
-)
-class UsersStuffListView(APIView):
-     permission_classes = [IsAuthenticated, IsStaffUser]
-     
-     
-     def get(self, request):
-        users = User.objects.all()
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data)
-        
-class MeView(APIView):
-    permission_classes = [IsAuthenticated]
-    
-    @extend_schema(
-        responses={200: UserSerializer}
-    )
-    def get(self, request):
-        serializer = UserSerializer(request.user)
-        return Response(serializer.data)
-    
-    @extend_schema(
-        request=UserSerializer,
-        responses={200: UserSerializer}
-    )
-    def put(self, request):
-        serializer = UserSerializer(request.user, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-    
-    @extend_schema(
-        request=UserSerializer,
-        responses={200: UserSerializer}
-    )
-    def patch(self, request):
-        serializer = UserSerializer(request.user, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-
 class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -126,7 +84,7 @@ class EmailVerificationView(APIView):
             token = default_token_generator.make_token(self.user)
             uid = urlsafe_base64_encode(force_bytes(self.user.pk))
             
-            reset_path = reverse("account:auth-confirm-email", kwargs={"uid": uid, "token": token})
+            reset_path = reverse("auth:auth-confirm-email", kwargs={"uid": uid, "token": token})
             reset_link = f"{request.build_absolute_uri(reset_path)}"
             send_mail(
                 'Email Verification',
@@ -153,7 +111,6 @@ class EmailConfirmedView(APIView):
         serializer.save()  # This calls the update method in your serializer
         return Response({"message": "Email verified successfully"})
 
-
 class ForgotPasswordView(APIView):
     permission_classes = [AllowAny]
     
@@ -170,7 +127,7 @@ class ForgotPasswordView(APIView):
             token = default_token_generator.make_token(self.user)
             uid = urlsafe_base64_encode(force_bytes(self.user.pk))
             
-            reset_path = reverse("account:auth-reset-password")
+            reset_path = reverse("auth:auth-reset-password")
             reset_link = f"{request.build_absolute_uri(reset_path)}{uid}/{token}/"
             
             send_mail(

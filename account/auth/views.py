@@ -126,8 +126,8 @@ class EmailVerificationView(APIView):
             token = default_token_generator.make_token(self.user)
             uid = urlsafe_base64_encode(force_bytes(self.user.pk))
             
-            reset_path = reverse("account:auth-confirm-email")
-            reset_link = f"{request.build_absolute_uri(reset_path)}{uid}/{token}/"
+            reset_path = reverse("account:auth-confirm-email", kwargs={"uid": uid, "token": token})
+            reset_link = f"{request.build_absolute_uri(reset_path)}"
             send_mail(
                 'Email Verification',
                 f'Click the link to verify your email: {reset_link}',

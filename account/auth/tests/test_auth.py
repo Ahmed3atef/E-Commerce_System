@@ -1,12 +1,8 @@
 import pytest
 from rest_framework import status
-from django.urls import reverse
-
-@pytest.fixture
-def register_endpoint(api_client):
-    def request_has_body(body):
-        return api_client.post(reverse("account:auth-register"), body)
-    return request_has_body
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 
 
 @pytest.mark.django_db
@@ -65,19 +61,6 @@ class TestRegisterAuth:
         response = register_endpoint(body)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-
-
-
-@pytest.fixture
-def auth_endpoints(api_client):
-    def login_endpoint(payload):
-            return  api_client.post(reverse("account:auth-login"), payload)
-    def refresh_endpoint(payload):
-            return  api_client.post(reverse("account:auth-token_refresh"), payload)
-    def logout_endpoint(payload):
-            return  api_client.post(reverse("account:auth-logout"), payload)
-    return {"login": login_endpoint, "refresh": refresh_endpoint, "logout": logout_endpoint}
-
 @pytest.mark.django_db
 class TestLoginAuth:
     
@@ -123,35 +106,6 @@ class TestLoginAuth:
         
         assert response.status_code == status.HTTP_200_OK
              
-        
-@pytest.fixture
-def me_endpoint(api_client):
-    def get_method(body={}, token=None):
-        if token:
-            api_client.credentials(HTTP_AUTHORIZATION=f'JWT {token}')
-        return  api_client.get(reverse("account:user-me"))
-    def post_method(body={}, token=None):
-        if token:
-            api_client.credentials(HTTP_AUTHORIZATION=f'JWT {token}')
-        return  api_client.post(reverse("account:user-me"), body)
-    def put_method(body={}, token=None):
-        if token:
-            api_client.credentials(HTTP_AUTHORIZATION=f'JWT {token}')
-        return  api_client.put(reverse("account:user-me"), body)
-    def patch_method(body={}, token=None):
-        if token:
-            api_client.credentials(HTTP_AUTHORIZATION=f'JWT {token}')
-        return  api_client.patch(reverse("account:user-me"), body)
-    return {"get": get_method, "post": post_method, "put": put_method, "patch": patch_method}
-
-@pytest.fixture
-def change_password_endpoint(api_client):
-    def request_has_body(body={}, token=None):
-        if token:
-            api_client.credentials(HTTP_AUTHORIZATION=f'JWT {token}')
-        return api_client.post(reverse("account:auth-change-password"), body)
-    return request_has_body
-
 @pytest.mark.django_db
 class TestMeView:
     
@@ -212,3 +166,62 @@ class TestMeView:
         assert response.data.get("email") == "seller@test.com"
         assert response.data.get("role") == "seller"
         assert response.data.get("is_phone_verified") == False
+
+@pytest.mark.django_db
+class TestEmailVerification:
+    def test_send_email_verification_200(self, api_client, db_user,email_verification_endpoints):
+        
+        body = {
+            "email": "seller@test.com",
+        }
+        
+        response = email_verification_endpoints["email_verify"](body)
+        
+        assert response.status_code == status.HTTP_200_OK
+        
+    def test_confirm_email_200(self, api_client, db_user, email_verification_endpoints):
+        
+        token = default_token_generator.make_token(db_user)
+        uid = urlsafe_base64_encode(force_bytes(db_user.pk))
+        
+        response = email_verification_endpoints["email_confirm"](uid, token)
+        
+        assert response.status_code == status.HTTP_200_OK
+        
+        db_user.refresh_from_db()
+        assert db_user.is_email_verified == True
+
+@pytest.mark.django_db
+class TestUsersStuffList:
+    def test_list_users_staff_200(self, api_client, db_user, users_stuff_endpoint, auth_endpoints):
+        # Make user staff
+        db_user.role = "staff"
+        db_user.save()
+        
+        # Login
+        login_body = {
+            "email": "seller@test.com",
+            "password": "StrongPass123"
+        }
+        login_response = auth_endpoints["login"](login_body)
+        access_token = login_response.data.get("access")
+        
+        response = users_stuff_endpoint(token=access_token)
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_list_users_non_staff_403(self, api_client, db_user, users_stuff_endpoint, auth_endpoints):
+        # Login (User is not staff by default)
+        login_body = {
+            "email": "seller@test.com",
+            "password": "StrongPass123"
+        }
+        login_response = auth_endpoints["login"](login_body)
+        access_token = login_response.data.get("access")
+        
+        response = users_stuff_endpoint(token=access_token)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_list_users_unauthenticated_401(self, api_client, users_stuff_endpoint):
+        response = users_stuff_endpoint()
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        

@@ -9,12 +9,21 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Deploy & Reload Webapp
-        uses: umuttopalak/pythonanywhere-deploy-action@v1.1.0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          host: 'www.pythonanywhere.com'
-          username: ${{ secrets.PA_USERNAME }}
-          api_token: ${{ secrets.PA_API_TOKEN }}
-          domain_name: 'ahmed3atef.pythonanywhere.com'
-          git_config: true
-          project_path: '/home/ahmed3atef/E-Commerce_System'
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Deploy to PythonAnywhere
+        env:
+          PA_USERNAME: ${{ secrets.PA_USERNAME }}
+          PA_API_TOKEN: ${{ secrets.PA_API_TOKEN }}
+          PA_DOMAIN_NAME: 'ahmed3atef.pythonanywhere.com'
+          PROJECT_PATH: '/home/ahmed3atef/E-Commerce_System'
+        run: python .github/scripts/deploy_pa.py

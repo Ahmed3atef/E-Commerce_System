@@ -192,7 +192,6 @@ SPECTACULAR_SETTINGS = {
 }
 
 if os.environ.get('ON_PYTHONANYWHERE'):
-    token = '74c3a9c657abef875f8b9529da7fb2fe'
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     
     

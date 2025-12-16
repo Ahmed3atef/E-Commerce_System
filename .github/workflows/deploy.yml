@@ -9,7 +9,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Deploy & Reload Webapp
         uses: umuttopalak/pythonanywhere-deploy-action@v1.1.0
         with:
@@ -17,3 +16,5 @@ jobs:
           username: ${{ secrets.PA_USERNAME }}
           api_token: ${{ secrets.PA_API_TOKEN }}
           domain_name: 'ahmed3atef.pythonanywhere.com'
+          git_config: true
+          project_path: '/home/ahmed3atef/E-Commerce_System'

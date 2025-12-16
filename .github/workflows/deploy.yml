@@ -7,18 +7,13 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy & Reload Webapp
+        uses: umuttopalak/pythonanywhere-deploy-action@v1.1.0
         with:
-          host: ssh.pythonanywhere.com
+          host: 'www.pythonanywhere.com'
           username: ${{ secrets.PA_USERNAME }}
-          key: ${{ secrets.PA_SSH_KEY }}
-          script_stop: false
-          script: |
-            export PATH=$PATH:/home/${{ secrets.PA_USERNAME }}/.local/bin
-            cd ~/E-Commerce_System
-            git pull origin main
-            source ~/.virtualenvs/ecom_env/bin/activate
-            pip install -r requirements.txt
-            python manage.py migrate
-            touch /var/www/${{ secrets.PA_DOMAIN_NAME }}_wsgi.py
+          api_token: ${{ secrets.PA_API_TOKEN }}
+          domain_name: 'ahmed3atef.pythonanywhere.com'

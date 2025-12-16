@@ -7,7 +7,8 @@ from account.auth.views import (CustomTokenObtainPairView,
                                 ForgotPasswordView, 
                                 ResetPasswordView,
                                 EmailVerificationView,
-                                EmailConfirmedView)
+                                EmailConfirmedView,
+                                UsersStuffListView)
 
 app_name = "account"
 
@@ -21,5 +22,6 @@ urlpatterns = [
     path("auth/reset-password/<str:uid>/<str:token>/", ResetPasswordView.as_view(), name="auth-reset-password"),
     path("auth/verify-email/", EmailVerificationView.as_view(), name="auth-verify-email"),
     path("auth/confirm-email/<str:uid>/<str:token>/", EmailConfirmedView.as_view(), name="auth-confirm-email"),
+    path("users/stuff/", UsersStuffListView.as_view(), name="users-stuff"),
     path("users/me/", MeView.as_view(), name="user-me"),
 ]

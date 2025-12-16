@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import get_user_model
 from drf_spectacular.utils import extend_schema
-
+from .permissions import IsStaffUser
 from .serializers import (CustomTokenObtainPairSerializer, 
                           RegisterResponseSerializer, 
                           RegisterSerializer, 
@@ -51,6 +51,18 @@ class RegisterView(APIView):
             response_serializer.data,
             status=status.HTTP_201_CREATED
         )
+ 
+@extend_schema(
+    responses={200: UserSerializer(many=True)}
+)
+class UsersStuffListView(APIView):
+     permission_classes = [IsAuthenticated, IsStaffUser]
+     
+     
+     def get(self, request):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
         
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
@@ -140,6 +152,8 @@ class EmailConfirmedView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()  # This calls the update method in your serializer
         return Response({"message": "Email verified successfully"})
+
+
 class ForgotPasswordView(APIView):
     permission_classes = [AllowAny]
     

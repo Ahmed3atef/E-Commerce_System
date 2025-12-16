@@ -95,6 +95,37 @@ class ChangePasswordSerializer(serializers.Serializer):
         fields = ["old_password", "new_password", "new_password2"]
         
 
+class EmailVerificationSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    
+    def validate(self, attrs):
+        try:
+            self.user = User.objects.get(email=attrs["email"])
+        except User.DoesNotExist:
+            raise serializers.ValidationError({"email": "User with this email does not exist"})
+        return attrs
+
+
+class EmailConfirmedSerializer(serializers.Serializer):
+    uid = serializers.CharField()
+    token = serializers.CharField()
+    
+    def validate(self, attrs):
+        try:
+            uid = force_str(urlsafe_base64_decode(attrs['uid']))
+            self.user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            raise serializers.ValidationError({"uid": "Invalid uid"})
+        
+        if not default_token_generator.check_token(self.user, attrs['token']):
+            raise serializers.ValidationError({"token": "Invalid token"})
+        return attrs
+    
+    def save(self, **kwargs):
+        self.user.is_email_verified = True
+        self.user.save()
+        return self.user
+
 class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
     

@@ -8,15 +8,21 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
+from django.contrib.auth import get_user_model
+from drf_spectacular.utils import extend_schema
+
 from .serializers import (CustomTokenObtainPairSerializer, 
                           RegisterResponseSerializer, 
                           RegisterSerializer, 
                           UserSerializer,
                           ChangePasswordSerializer,
                           ForgotPasswordSerializer,
-                          ResetPasswordSerializer)
-from django.contrib.auth import get_user_model
-from drf_spectacular.utils import extend_schema
+                          ResetPasswordSerializer,
+                          EmailVerificationSerializer,
+                          EmailConfirmedSerializer
+                          )
+
+
 
 User = get_user_model()
 
@@ -92,6 +98,48 @@ class ChangePasswordView(APIView):
                         status=status.HTTP_200_OK)
        
 
+class EmailVerificationView(APIView):
+    permission_classes = [AllowAny]
+    
+    @extend_schema(
+        request=EmailVerificationSerializer,
+        responses={200: UserSerializer}
+    )
+    def post(self, request):
+        serializer = EmailVerificationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        self.user = getattr(serializer, "user", None)
+        if self.user:
+            token = default_token_generator.make_token(self.user)
+            uid = urlsafe_base64_encode(force_bytes(self.user.pk))
+            
+            reset_path = reverse("account:auth-confirm-email")
+            reset_link = f"{request.build_absolute_uri(reset_path)}{uid}/{token}/"
+            send_mail(
+                'Email Verification',
+                f'Click the link to verify your email: {reset_link}',
+                'noreply@ecommerce.com',
+                [self.user.email],
+                fail_silently=False,
+            )
+            
+        return Response({"message": "Verification email sent successfully"})
+
+class EmailConfirmedView(APIView):
+    http_method_names = ['get']
+    permission_classes = [AllowAny]
+    
+    @extend_schema(
+        request=EmailConfirmedSerializer,
+        responses={200: EmailConfirmedSerializer}
+    )
+    def get(self, request, uid, token):
+        data = {"uid": uid, "token": token}
+        serializer = EmailConfirmedSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()  # This calls the update method in your serializer
+        return Response({"message": "Email verified successfully"})
 class ForgotPasswordView(APIView):
     permission_classes = [AllowAny]
     
@@ -120,7 +168,6 @@ class ForgotPasswordView(APIView):
             )
         return Response({"message": "If email exists, reset link was sent"})
         
-
 class ResetPasswordView(APIView):
     permission_classes = [AllowAny]
     

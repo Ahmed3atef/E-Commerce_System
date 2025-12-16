@@ -41,6 +41,7 @@ class User(AbstractUser):
         CUSTOMER = "customer", "Customer"
         SELLER = "seller", "Seller"
     email = models.EmailField(unique=True)
+    is_email_verified = models.BooleanField(default=False)
     phone = models.CharField(
         max_length=15,
         blank=True,

@@ -14,6 +14,7 @@ class CustomUserAdmin(UserAdmin):
         "is_active",
         "is_staff",
         "is_superuser",
+        "is_email_verified",
         "is_phone_verified",
     )
 

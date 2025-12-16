@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import timedelta
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -87,16 +88,28 @@ WSGI_APPLICATION = 'ECOMMERCE.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ecommerce',
-        'HOST': 'localhost',
-        'USER':'postgres',
-        'PASSWORD':'psql',
-        'PORT': 5432
+if os.environ.get('ON_PYTHONANYWHERE'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'ahmed3atef$ecommerce',
+            'HOST': 'ahmed3atef.mysql.pythonanywhere-services.com',
+            'USER':'ahmed3atef',
+            'PASSWORD':'TESTserver123',
+            'PORT': 3306
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'ecommerce',
+            'HOST': 'localhost',
+            'USER':'postgres',
+            'PASSWORD':'psql',
+            'PORT': 5432
+        }
+    }
 
 
 # Password validation
@@ -178,9 +191,15 @@ SPECTACULAR_SETTINGS = {
     'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
 }
 
-
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = 2525
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
+if os.environ.get('ON_PYTHONANYWHERE'):
+    token = '74c3a9c657abef875f8b9529da7fb2fe'
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    
+    
+    
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'localhost'
+    EMAIL_PORT = 2525
+    EMAIL_HOST_USER = ''
+    EMAIL_HOST_PASSWORD = ''

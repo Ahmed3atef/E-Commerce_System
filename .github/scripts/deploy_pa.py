@@ -42,11 +42,39 @@ resp = make_request('POST', 'consoles/', {'executable': 'bash'})
 console_id = resp.json()['id']
 print(f"Console {console_id} created.")
 
-try:
-    # 2. Run git pull
-    # We allow some time for console to initialize
-    time.sleep(2)
+# 2. Wait for console to be ready (handle 412 Precondition Failed)
+print("Waiting for console to initialize...")
+max_init_retries = 20
+console_ready = False
+for i in range(max_init_retries):
+    # Use requests directly to avoid make_request's sys.exit() on error
+    url = API_BASE + f'consoles/{console_id}/get_latest_output/'
+    headers = {'Authorization': f'Token {API_TOKEN}'}
+    resp = requests.get(url, headers=headers)
     
+    if resp.status_code == 200:
+        print("\nConsole ready.")
+        console_ready = True
+        break
+    elif resp.status_code == 412: # Console not yet started
+        print(".", end='', flush=True)
+        time.sleep(2)
+        continue
+    else:
+        # Some other error
+        print(f"\nError checking console status: {resp.status_code} {resp.text}")
+        break
+
+if not console_ready:
+    print("\nError: Console failed to initialize. Aborting.")
+    # Clean up
+    url = API_BASE + f'consoles/{console_id}/'
+    headers = {'Authorization': f'Token {API_TOKEN}'}
+    requests.delete(url, headers=headers)
+    sys.exit(1)
+
+try:
+    # 3. Run git pull
     command = f"cd {PROJECT_PATH} && git pull\n"
     print(f"Executing: {command.strip()}")
     make_request('POST', f'consoles/{console_id}/send_input/', {'input': command})

@@ -1,10 +1,11 @@
 import pytest
 from rest_framework import status
+from django.urls import reverse
 
 @pytest.fixture
 def register_endpoint(api_client):
     def request_has_body(body):
-        return api_client.post('/api/account/auth/register/', body)
+        return api_client.post(reverse("account:auth-register"), body)
     return request_has_body
 
 
@@ -70,11 +71,11 @@ class TestRegisterAuth:
 @pytest.fixture
 def auth_endpoints(api_client):
     def login_endpoint(payload):
-            return  api_client.post('/api/account/auth/login/', payload)
+            return  api_client.post(reverse("account:auth-login"), payload)
     def refresh_endpoint(payload):
-            return  api_client.post('/api/account/auth/refresh/', payload)
+            return  api_client.post(reverse("account:auth-token_refresh"), payload)
     def logout_endpoint(payload):
-            return  api_client.post('/api/account/auth/logout/', payload)
+            return  api_client.post(reverse("account:auth-logout"), payload)
     return {"login": login_endpoint, "refresh": refresh_endpoint, "logout": logout_endpoint}
 
 @pytest.mark.django_db
@@ -128,19 +129,19 @@ def me_endpoint(api_client):
     def get_method(body={}, token=None):
         if token:
             api_client.credentials(HTTP_AUTHORIZATION=f'JWT {token}')
-        return  api_client.get('/api/account/users/me/')
+        return  api_client.get(reverse("account:user-me"))
     def post_method(body={}, token=None):
         if token:
             api_client.credentials(HTTP_AUTHORIZATION=f'JWT {token}')
-        return  api_client.post('/api/account/users/me/', body)
+        return  api_client.post(reverse("account:user-me"), body)
     def put_method(body={}, token=None):
         if token:
             api_client.credentials(HTTP_AUTHORIZATION=f'JWT {token}')
-        return  api_client.put('/api/account/users/me/', body)
+        return  api_client.put(reverse("account:user-me"), body)
     def patch_method(body={}, token=None):
         if token:
             api_client.credentials(HTTP_AUTHORIZATION=f'JWT {token}')
-        return  api_client.patch('/api/account/users/me/', body)
+        return  api_client.patch(reverse("account:user-me"), body)
     return {"get": get_method, "post": post_method, "put": put_method, "patch": patch_method}
 
 @pytest.fixture
@@ -148,7 +149,7 @@ def change_password_endpoint(api_client):
     def request_has_body(body={}, token=None):
         if token:
             api_client.credentials(HTTP_AUTHORIZATION=f'JWT {token}')
-        return api_client.post('/api/account/auth/change-password/', body)
+        return api_client.post(reverse("account:auth-change-password"), body)
     return request_has_body
 
 @pytest.mark.django_db

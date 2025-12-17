@@ -20,6 +20,16 @@ from django.contrib.auth.models import update_last_login
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        
+        token["email"] = user.email
+        token["role"] = user.role
+        token["is_phone_verified"] = user.is_phone_verified
+        
+        return token
+
     def validate(self, attrs):
         # manually authenticate the user
         self.user = authenticate(
@@ -65,8 +75,9 @@ class Verify2FASerializer(serializers.Serializer):
         user_id = attrs.get("user_id")
         code = attrs.get("code")
         
-        if not verify_2fa_code(user_id, code):
-            raise serializers.ValidationError({"code": "Invalid or expired code."})
+        success, message = verify_2fa_code(user_id, code)
+        if not success:
+            raise serializers.ValidationError({"code": message})
             
         try:
             self.user = User.objects.get(pk=user_id)

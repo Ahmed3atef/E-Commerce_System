@@ -78,3 +78,10 @@ def forgot_password_endpoint(api_client):
 
     return {"send_change_password_email": send_change_password_email, "rest_passord_get": rest_passord_get, "rest_passord_post": rest_passord_post}
 
+@pytest.fixture
+def verify_2fa_endpoint(api_client):
+    def request_has_body(body):
+        return api_client.post(reverse("auth:auth-verify-2fa"), body)
+    return request_has_body
+
+

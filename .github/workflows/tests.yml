@@ -1,0 +1,61 @@
+name: Django CI
+
+on:
+    push:
+        branches: ["main"]
+    pull_request:
+        branches: ["main"]
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+
+        services:
+            postgres:
+                image: postgres:15
+                env:
+                    POSTGRES_DB: ecommerce
+                    POSTGRES_USER: postgres
+                    POSTGRES_PASSWORD: psql
+                ports:
+                    - 5432:5432
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+
+            redis:
+                image: redis:latest
+                ports:
+                    - 6379:6379
+                options: >-
+                    --health-cmd "redis-cli ping"
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.13"
+
+            - name: Install uv
+              uses: astral-sh/setup-uv@v5
+              with:
+                  enable-cache: true
+                  version: "latest"
+
+            - name: Install dependencies
+              run: uv sync --all-groups
+
+            - name: Run Tests
+              env:
+                  SECRET_KEY: "&a*46%n5+7zrv9#kbkd0a&p_#z=%)551r0&ror5i1lex*)o$yb"
+                  DJANGO_SETTINGS_MODULE: ECOMMERCE.settings
+            
+              run: |
+                  uv run pytest

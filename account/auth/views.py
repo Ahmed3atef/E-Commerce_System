@@ -1,3 +1,4 @@
+from drf_spectacular.utils import OpenApiResponse
 from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode
@@ -9,8 +10,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import get_user_model
-from drf_spectacular.utils import extend_schema
-from .permissions import IsStaffUser
+from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiExample, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 from .serializers import (CustomTokenObtainPairSerializer, 
                           RegisterResponseSerializer, 
                           RegisterSerializer, 
@@ -19,7 +20,7 @@ from .serializers import (CustomTokenObtainPairSerializer,
                           ForgotPasswordSerializer,
                           ResetPasswordSerializer,
                           EmailVerificationSerializer,
-                          EmailConfirmedSerializer
+                          EmailConfirmedSerializer,
                           )
 
 
@@ -28,7 +29,71 @@ User = get_user_model()
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     @extend_schema(
-        responses={200: CustomTokenObtainPairSerializer}
+        request={
+            "type": "object",
+            "properties": {
+                "email": {"type": "string", "format": "email"},
+                "password": {"type": "string", "format": "password"}
+            },
+            "required": ["email", "password"]
+        },
+        responses={
+            200: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "access": {"type": "string"},
+                        "refresh": {"type": "string"}
+                    }
+                },
+                description="Login successful",
+                examples=[
+                    OpenApiExample(
+                        "Success",
+                        value={
+                            "access": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+                            "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+                        },
+                    )
+                ]
+            ),
+            401: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "detail": {"type": "string"}
+                    }
+                },
+                description="Invalid credentials",
+                examples=[
+                    OpenApiExample(
+                        "Invalid Credentials",
+                        value={"detail": "No active account found with the given credentials"},
+                    )
+                ]
+            ),
+            400: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "email": {"type": "array", "items": {"type": "string"}},
+                        "password": {"type": "array", "items": {"type": "string"}}
+                    }
+                },
+                description="Validation errors",
+                examples=[
+                    OpenApiExample(
+                        "Missing Fields",
+                        value={
+                            "email": ["This field is required."],
+                            "password": ["This field is required."]
+                        },
+                    )
+                ]
+            ),
+        },
+        description="Obtain JWT token pair (access and refresh tokens). The access token contains custom claims: email, role, and is_phone_verified.",
+        summary="Login - Obtain Token Pair"
     )
     def get_serializer_class(self):
         return CustomTokenObtainPairSerializer
@@ -39,7 +104,41 @@ class RegisterView(APIView):
     
     @extend_schema(
         request=RegisterSerializer,
-        responses={201: RegisterResponseSerializer}
+        responses={
+            201: OpenApiResponse(
+                response=RegisterResponseSerializer,
+                description="User registered successfully",
+                examples=[
+                    OpenApiExample(
+                        "Success",
+                        value={
+                            "id": 1,
+                            "email": "user@example.com",
+                            "role": "customer"
+                        },
+                    )
+                ]
+            ),
+            400: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "email": {"type": "array", "items": {"type": "string"}},
+                        "password": {"type": "array", "items": {"type": "string"}},
+                    }
+                },
+                description="Validation errors",
+                examples=[
+                    OpenApiExample(
+                        "Validation Error",
+                        value={
+                            "email": ["Enter a valid email address."],
+                            "password": ["Passwords do not match"]
+                        }
+                    )
+                ]
+            ),
+        }
     )
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -57,7 +156,46 @@ class ChangePasswordView(APIView):
     
     @extend_schema(
         request=ChangePasswordSerializer,
-        responses={200: UserSerializer}
+        responses={
+            200: OpenApiResponse(
+                response=UserSerializer,
+                description="Password changed successfully",
+                examples=[
+                    OpenApiExample(
+                        "Success",
+                        value={
+                            "id": 1,
+                            "email": "user@example.com",
+                            "username": "john_doe",
+                            # Add other UserSerializer fields here
+                        },
+                    )
+                ]
+            ),
+            400: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "old_password": {"type": "array", "items": {"type": "string"}},
+                        "new_password": {"type": "array", "items": {"type": "string"}},
+                    }
+                },
+                description="Validation errors",
+                examples=[
+                    OpenApiExample(
+                        "Incorrect Old Password",
+                        value={"old_password": ["Old password is incorrect"]},
+                    ),
+                    OpenApiExample(
+                        "Passwords Don't Match",
+                        value={"new_password": ["Passwords do not match"]},
+                    )
+                ]
+            ),
+            401: OpenApiResponse(
+                description="Authentication credentials were not provided"
+            ),
+        }
     )
     def post(self, request):
         serializer = ChangePasswordSerializer(request.user, data=request.data, context={"request": request})
@@ -73,7 +211,32 @@ class EmailVerificationView(APIView):
     
     @extend_schema(
         request=EmailVerificationSerializer,
-        responses={200: UserSerializer}
+        responses={
+            200: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"}
+                    }
+                },
+                description="Verification email sent",
+                examples=[
+                    OpenApiExample(
+                        "Success",
+                        value={"message": "Verification email sent successfully"}
+                    )
+                ]
+            ),
+            400: OpenApiResponse(
+                description="Validation errors",
+                examples=[
+                    OpenApiExample(
+                        "User Not Found",
+                        value={"email": ["User with this email does not exist"]}
+                    )
+                ]
+            )
+        }
     )
     def post(self, request):
         serializer = EmailVerificationSerializer(data=request.data)
@@ -101,8 +264,68 @@ class EmailConfirmedView(APIView):
     permission_classes = [AllowAny]
     
     @extend_schema(
-        request=EmailConfirmedSerializer,
-        responses={200: EmailConfirmedSerializer}
+        parameters=[
+            OpenApiParameter(
+                name='uid',
+                type=str,
+                location=OpenApiParameter.PATH,
+                description='Base64 encoded user ID'
+            ),
+            OpenApiParameter(
+                name='token',
+                type=str,
+                location=OpenApiParameter.PATH,
+                description='Email verification token'
+            ),
+        ],
+        request=None,  # GET requests don't have a request body
+        responses={
+            200: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"}
+                    }
+                },
+                description="Email verified successfully",
+                examples=[
+                    OpenApiExample(
+                        "Success",
+                        value={"message": "Email verified successfully"},
+                    )
+                ]
+            ),
+            400: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "token": {"type": "string"}
+                    }
+                },
+                description="Invalid or expired token",
+                examples=[
+                    OpenApiExample(
+                        "Invalid Token",
+                        value={"token": "Invalid or expired token"},
+                    )
+                ]
+            ),
+            404: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "detail": {"type": "string"}
+                    }
+                },
+                description="Invalid confirmation link",
+                examples=[
+                    OpenApiExample(
+                        "Not Found",
+                        value={"detail": "Invalid or expired confirmation link"},
+                    )
+                ]
+            ),
+        }
     )
     def get(self, request, uid, token):
         data = {"uid": uid, "token": token}
@@ -116,7 +339,38 @@ class ForgotPasswordView(APIView):
     
     @extend_schema(
         request=ForgotPasswordSerializer,
-        responses={200: UserSerializer}
+        responses={
+            200: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"}
+                    }
+                },
+                description="Password reset email sent successfully",
+                examples=[
+                    OpenApiExample(
+                        "Success",
+                        value={"message": "Password reset email has been sent"},
+                    )
+                ]
+            ),
+            404: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "detail": {"type": "string"}
+                    }
+                },
+                description="User not found",
+                examples=[
+                    OpenApiExample(
+                        "Not Found",
+                        value={"detail": "User with this email does not exist"},
+                    )
+                ]
+            ),
+        }
     )
     def post(self, request):
         serializer = ForgotPasswordSerializer(data=request.data)
@@ -143,15 +397,77 @@ class ResetPasswordView(APIView):
     permission_classes = [AllowAny]
     
     @extend_schema(
-        request=ResetPasswordSerializer,
-        responses={200: UserSerializer}
+        parameters=[
+            OpenApiParameter(
+                name='uid',
+                type=str,
+                location=OpenApiParameter.PATH,
+                description='Base64 encoded user ID'
+            ),
+            OpenApiParameter(
+                name='token',
+                type=str,
+                location=OpenApiParameter.PATH,
+                description='Password reset token'
+            ),
+        ],
+        request=None,
+        responses={
+            200: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "uid": {"type": "string"},
+                        "token": {"type": "string"}
+                    }
+                },
+                description="Token validated",
+                examples=[
+                    OpenApiExample(
+                        "Success",
+                        value={"uid": "Mg", "token": "abc-123456"}
+                    )
+                ]
+            )
+        }
     )
     def get(self, request, uid, token):
         return Response({'uid': uid, 'token': token})
     
     @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='uid',
+                type=str,
+                location=OpenApiParameter.PATH,
+                description='Base64 encoded user ID'
+            ),
+            OpenApiParameter(
+                name='token',
+                type=str,
+                location=OpenApiParameter.PATH,
+                description='Password reset token'
+            ),
+        ],
         request=ResetPasswordSerializer,
-        responses={200: UserSerializer}
+        responses={
+            200: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"}
+                    }
+                },
+                description="Password reset successful",
+                examples=[
+                    OpenApiExample(
+                        "Success",
+                        value={"message": "Password reset successful"}
+                    )
+                ]
+            ),
+            400: OpenApiResponse(description="Validation errors")
+        }
     )
     def post(self, request, uid, token):
         data = request.data.copy()

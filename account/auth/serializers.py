@@ -1,6 +1,7 @@
 from django.db import transaction
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound
 from core.models import User
 from account.models import SellerProfile, CustomerProfile
 from django.utils.http import urlsafe_base64_decode
@@ -133,9 +134,10 @@ class ForgotPasswordSerializer(serializers.Serializer):
         try:
             self.user = User.objects.get(email=attrs["email"])
         except User.DoesNotExist:
-            raise serializers.ValidationError({"email": "User with this email does not exist"})
+            raise NotFound("User with this email does not exist")
         return attrs
-    
+
+
 class ResetPasswordSerializer(serializers.Serializer):
     uid = serializers.CharField()
     token = serializers.CharField()

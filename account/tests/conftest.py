@@ -61,13 +61,6 @@ def me_endpoint(api_client):
         return  api_client.patch(reverse("account:user-me"), body)
     return {"get": get_method, "post": post_method, "put": put_method, "patch": patch_method}
 
-@pytest.fixture
-def change_password_endpoint(api_client):
-    def request_has_body(body={}, token=None):
-        if token:
-            api_client.credentials(HTTP_AUTHORIZATION=f'JWT {token}')
-        return api_client.post(reverse("auth:auth-change-password"), body)
-    return request_has_body
 
 
 @pytest.fixture

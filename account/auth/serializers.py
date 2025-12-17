@@ -7,6 +7,7 @@ from account.models import SellerProfile, CustomerProfile
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 from django.contrib.auth.tokens import default_token_generator
+from .tokens import email_verification_token_generator
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -118,7 +119,7 @@ class EmailConfirmedSerializer(serializers.Serializer):
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
             raise serializers.ValidationError({"uid": "Invalid uid"})
         
-        if not default_token_generator.check_token(self.user, attrs['token']):
+        if not email_verification_token_generator.check_token(self.user, attrs['token']):
             raise serializers.ValidationError({"token": "Invalid token"})
         return attrs
     

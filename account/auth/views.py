@@ -4,6 +4,7 @@ from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode
 from django.urls import reverse
 from django.contrib.auth.tokens import default_token_generator
+from .tokens import email_verification_token_generator
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -244,7 +245,7 @@ class EmailVerificationView(APIView):
         
         self.user = getattr(serializer, "user", None)
         if self.user:
-            token = default_token_generator.make_token(self.user)
+            token = email_verification_token_generator.make_token(self.user)
             uid = urlsafe_base64_encode(force_bytes(self.user.pk))
             
             reset_path = reverse("auth:auth-confirm-email", kwargs={"uid": uid, "token": token})
@@ -449,7 +450,7 @@ class ResetPasswordView(APIView):
                 description='Password reset token'
             ),
         ],
-        request=ResetPasswordSerializer,
+        request=None,
         responses={
             200: OpenApiResponse(
                 response={

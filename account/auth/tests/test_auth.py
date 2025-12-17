@@ -141,8 +141,8 @@ class TestEmailVerification:
         assert response.status_code == status.HTTP_200_OK
         
     def test_confirm_email_200(self, api_client, db_user, email_verification_endpoints):
-        
-        token = default_token_generator.make_token(db_user)
+        from account.auth.tokens import email_verification_token_generator
+        token = email_verification_token_generator.make_token(db_user)
         uid = urlsafe_base64_encode(force_bytes(db_user.pk))
         
         response = email_verification_endpoints["email_confirm"](uid, token)
@@ -151,6 +151,25 @@ class TestEmailVerification:
         
         db_user.refresh_from_db()
         assert db_user.is_email_verified == True
+
+    def test_email_verification_token_replay(self, api_client, db_user, email_verification_endpoints):
+         # 1. Generate token
+        from account.auth.tokens import email_verification_token_generator
+        token = email_verification_token_generator.make_token(db_user)
+        uid = urlsafe_base64_encode(force_bytes(db_user.pk))
+        
+        # 2. Verify Email (First Use)
+        response = email_verification_endpoints["email_confirm"](uid, token)
+        assert response.status_code == status.HTTP_200_OK
+        
+        db_user.refresh_from_db()
+        assert db_user.is_email_verified == True
+
+        # 3. Try to Verify Again (Replay)
+        # This SHOULD fail because verifying changes the hash state (is_email_verified True -> token invalid for False)
+        response_replay = email_verification_endpoints["email_confirm"](uid, token)
+        
+        assert response_replay.status_code == status.HTTP_400_BAD_REQUEST
 
 @pytest.mark.django_db
 class TestForgetPassword:
@@ -200,5 +219,25 @@ class TestForgetPassword:
         
         assert response.status_code == status.HTTP_200_OK
         assert response.data.get("message") == "Password reset successfully"
+
+    def test_reset_password_token_invalidation_after_use(self, api_client, db_user, forgot_password_endpoint):
+        # 1. Generate token
+        token = default_token_generator.make_token(db_user)
+        uid = urlsafe_base64_encode(force_bytes(db_user.pk))
+        
+        # 2. Reset Password (First Use)
+        body = {
+            "password": "NewPass123",
+            "password2": "NewPass123"
+        }
+        response = forgot_password_endpoint["rest_passord_post"](uid, token, body)
+        assert response.status_code == status.HTTP_200_OK
+
+        # 3. Try to Reset Again (Replay)
+        response_replay = forgot_password_endpoint["rest_passord_post"](uid, token, body)
+        
+        # This SHOULD fail because changing password invalidates the token
+        assert response_replay.status_code == status.HTTP_400_BAD_REQUEST
+        assert "token" in response_replay.data
         
     

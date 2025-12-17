@@ -43,19 +43,39 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         responses={
             200: OpenApiResponse(
                 response={
-                    "type": "object",
-                    "properties": {
-                        "access": {"type": "string"},
-                        "refresh": {"type": "string"}
-                    }
+                    "oneOf": [
+                        {
+                            "type": "object",
+                            "properties": {
+                                "access": {"type": "string"},
+                                "refresh": {"type": "string"}
+                            },
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "requires_2fa": {"type": "boolean"},
+                                "user_id": {"type": "integer"},
+                                "message": {"type": "string"}
+                            },
+                        }
+                    ]
                 },
-                description="Login successful",
+                description="Login successful OR 2FA required",
                 examples=[
                     OpenApiExample(
-                        "Success",
+                        "Success - Tokens",
                         value={
                             "access": "eyJ0eXAiOiJKV1QiLCJhbGc...",
                             "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+                        },
+                    ),
+                    OpenApiExample(
+                        "Success - 2FA Required",
+                        value={
+                            "requires_2fa": True,
+                            "user_id": 1,
+                            "message": "Enter the 6-digit code sent to your email."
                         },
                     )
                 ]
@@ -76,27 +96,12 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                 ]
             ),
             400: OpenApiResponse(
-                response={
-                    "type": "object",
-                    "properties": {
-                        "email": {"type": "array", "items": {"type": "string"}},
-                        "password": {"type": "array", "items": {"type": "string"}}
-                    }
-                },
-                description="Validation errors",
-                examples=[
-                    OpenApiExample(
-                        "Missing Fields",
-                        value={
-                            "email": ["This field is required."],
-                            "password": ["This field is required."]
-                        },
-                    )
-                ]
+                description="Validation errors"
             ),
         },
-        description="Obtain JWT token pair (access and refresh tokens). The access token contains custom claims: email, role, and is_phone_verified.",
-        summary="Login - Obtain Token Pair"
+        description="Obtain JWT token pair OR initiate 2FA flow. If 2FA is enabled for the account, a user_id and challenge message are returned instead of tokens.",
+        summary="Login - Obtain Token Pair / Initiate 2FA"
+
     )
     def get_serializer_class(self):
         return CustomTokenObtainPairSerializer
@@ -107,9 +112,36 @@ class Verify2FAView(APIView):
     @extend_schema(
         request=Verify2FASerializer,
         responses={
-            200: OpenApiResponse(description="2FA verified, tokens returned"),
-            400: OpenApiResponse(description="Invalid code or user_id")
+            200: OpenApiResponse(
+                response={
+                    "type": "object",
+                    "properties": {
+                        "access": {"type": "string"},
+                        "refresh": {"type": "string"}
+                    }
+                },
+                description="2FA verified successfully",
+                examples=[
+                    OpenApiExample(
+                        "Success",
+                        value={
+                            "access": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+                            "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+                        },
+                    )
+                ]
+            ),
+            400: OpenApiResponse(
+                description="Invalid code or user_id",
+                examples=[
+                    OpenApiExample(
+                        "Invalid Code",
+                        value={"code": ["Invalid or expired code."]}
+                    )
+                ]
+            )
         },
+
         summary="Verify 2FA Code"
     )
     def post(self, request):
@@ -119,12 +151,7 @@ class Verify2FAView(APIView):
         user = serializer.user
         refresh = CustomTokenObtainPairSerializer.get_token(user)
         
-        # Add custom claims to the access token manually if needed, 
-        # or use the get_token method from CustomTokenObtainPairSerializer
-        # For simplicity, we use the default for_user which works if CustomTokenObtainPairSerializer.get_token is overridden
-        # But for_user uses the default RefreshToken. 
-        # Better: use the serializer's logic if possible or just return tokens.
-        
+
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),

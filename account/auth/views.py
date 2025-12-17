@@ -478,5 +478,5 @@ class ResetPasswordView(APIView):
         serializer.is_valid(raise_exception=True)
         
         serializer.save() 
-        return Response({"message": "Password reset successful"})
+        return Response({"message": "Password reset successfully"})
 

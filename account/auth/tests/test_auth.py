@@ -185,3 +185,20 @@ class TestForgetPassword:
         response = forgot_password_endpoint["rest_passord_get"](uid, token)
         
         assert response.status_code == status.HTTP_200_OK
+        assert response.data.get("uid") == uid
+        assert response.data.get("token") == token
+    
+    def test_reset_password_post_200(self, api_client, db_user, forgot_password_endpoint):
+        token = default_token_generator.make_token(db_user)
+        uid = urlsafe_base64_encode(force_bytes(db_user.pk))
+        body = {
+            "password": "NewPass123",
+            "password2": "NewPass123"
+        }
+        
+        response = forgot_password_endpoint["rest_passord_post"](uid, token, body)
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data.get("message") == "Password reset successfully"
+        
+    

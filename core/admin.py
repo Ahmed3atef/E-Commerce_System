@@ -15,7 +15,11 @@ class CustomUserAdmin(UserAdmin):
         "is_staff",
         "is_superuser",
         "is_email_verified",
-        "is_phone_verified",
+        "is_2fa_enabled",
+    )
+    
+    list_editable = (
+        "is_2fa_enabled",
     )
 
     list_filter = (

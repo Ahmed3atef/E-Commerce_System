@@ -7,19 +7,74 @@ from account.models import SellerProfile, CustomerProfile
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 from django.contrib.auth.tokens import default_token_generator
-from .tokens import email_verification_token_generator
+from .utils import email_verification_token_generator, generate_2fa_code, verify_2fa_code
+from django.core.mail import send_mail
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.settings import api_settings
+from django.contrib.auth.models import update_last_login
+
+
+
+
+
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
+    def validate(self, attrs):
+        # manually authenticate the user
+        self.user = authenticate(
+            request=self.context.get('request'),
+            email=attrs.get("email"),
+            password=attrs.get("password")
+        )
+        if not self.user or not self.user.is_active:
+            raise serializers.ValidationError({"detail": "No active account found with the given credentials"})
+        # Check 2FA
+        if self.user.is_2fa_enabled:
+            code = generate_2fa_code(self.user.id)
+            send_mail(
+                "Your 2FA Login Code",
+                f"Your verification code is: {code}",
+                "noreply@ecommerce.com",
+                [self.user.email],
+                fail_silently=True,
+            )
+            return {
+                "requires_2fa": True,
+                "user_id": self.user.id,
+                "message": "Enter the 6-digit code sent to your email."
+            }
+            
+        # ONLY NOW generate tokens if 2FA is not required
+        refresh = self.get_token(self.user)
+        data = {
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+        }
+        # Update last login if settings allow
+        if api_settings.UPDATE_LAST_LOGIN:
+            
+            update_last_login(None, self.user)
+        return data
+
+class Verify2FASerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    code = serializers.CharField(max_length=6)
+
+    def validate(self, attrs):
+        user_id = attrs.get("user_id")
+        code = attrs.get("code")
         
-        token["email"] = user.email
-        token["role"] = user.role
-        token["is_phone_verified"] = user.is_phone_verified
-        
-        return token
+        if not verify_2fa_code(user_id, code):
+            raise serializers.ValidationError({"code": "Invalid or expired code."})
+            
+        try:
+            self.user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            raise serializers.ValidationError({"user_id": "User not found."})
+            
+        return attrs
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     

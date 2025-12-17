@@ -4,6 +4,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.core import mail
+from account.auth.utils import email_verification_token_generator
 
 
 @pytest.mark.django_db
@@ -141,7 +142,7 @@ class TestEmailVerification:
         assert response.status_code == status.HTTP_200_OK
         
     def test_confirm_email_200(self, api_client, db_user, email_verification_endpoints):
-        from account.auth.tokens import email_verification_token_generator
+        
         token = email_verification_token_generator.make_token(db_user)
         uid = urlsafe_base64_encode(force_bytes(db_user.pk))
         
@@ -154,7 +155,6 @@ class TestEmailVerification:
 
     def test_email_verification_token_replay(self, api_client, db_user, email_verification_endpoints):
          # 1. Generate token
-        from account.auth.tokens import email_verification_token_generator
         token = email_verification_token_generator.make_token(db_user)
         uid = urlsafe_base64_encode(force_bytes(db_user.pk))
         

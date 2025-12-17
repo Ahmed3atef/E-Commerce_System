@@ -4,12 +4,13 @@ from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode
 from django.urls import reverse
 from django.contrib.auth.tokens import default_token_generator
-from .tokens import email_verification_token_generator
+from .utils import email_verification_token_generator
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiExample, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
@@ -22,6 +23,7 @@ from .serializers import (CustomTokenObtainPairSerializer,
                           ResetPasswordSerializer,
                           EmailVerificationSerializer,
                           EmailConfirmedSerializer,
+                          Verify2FASerializer,
                           )
 
 
@@ -98,6 +100,36 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     )
     def get_serializer_class(self):
         return CustomTokenObtainPairSerializer
+
+class Verify2FAView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        request=Verify2FASerializer,
+        responses={
+            200: OpenApiResponse(description="2FA verified, tokens returned"),
+            400: OpenApiResponse(description="Invalid code or user_id")
+        },
+        summary="Verify 2FA Code"
+    )
+    def post(self, request):
+        serializer = Verify2FASerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        user = serializer.user
+        refresh = CustomTokenObtainPairSerializer.get_token(user)
+        
+        # Add custom claims to the access token manually if needed, 
+        # or use the get_token method from CustomTokenObtainPairSerializer
+        # For simplicity, we use the default for_user which works if CustomTokenObtainPairSerializer.get_token is overridden
+        # But for_user uses the default RefreshToken. 
+        # Better: use the serializer's logic if possible or just return tokens.
+        
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        })
+
 
 class RegisterView(APIView):
     http_method_names = ['post']

@@ -14,6 +14,8 @@ urlpatterns = [
     #auth
     path("api/auth/", include("account.auth.urls")),
     path("api/account/", include("account.urls")),
+    path("api/store/", include("store.urls")),
+    path("api/product/", include("product.urls")),
     
     # Swagger / OpenAPI
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

@@ -29,6 +29,10 @@ class Category(models.Model):
         on_delete=models.CASCADE
     )
     
+    description = models.TextField(blank=True)
+    icon = models.CharField(max_length=50, blank=True) # for fontawesome etc
+    image = models.ImageField(upload_to="category/images", blank=True, null=True)
+
     is_active = models.BooleanField(default=True)
     
     def save(self, *args, **kwargs):

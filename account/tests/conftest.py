@@ -24,6 +24,23 @@ def db_user():
     return user
 
 @pytest.fixture
+def customer_user(db):
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    user = User.objects.create(
+        email="customer@test.com",
+        password=make_password("CustomerPass123"),
+        phone="+201111111111",
+        role="customer"
+    )
+    return user
+
+@pytest.fixture
+def customer_profile(customer_user):
+    from account.models import CustomerProfile
+    return CustomerProfile.objects.get_or_create(user=customer_user)[0]
+
+@pytest.fixture
 def register_endpoint(api_client):
     def request_has_body(body):
         return api_client.post(reverse("auth:auth-register"), body)

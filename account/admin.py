@@ -1,6 +1,16 @@
+# account/admin.py
 from django.contrib import admin
-from .models import *
+from .models import CustomerProfile, SellerProfile, StaffProfile
+from address.admin import AddressInline
 
-admin.site.register(customer.CustomerProfile)
-admin.site.register(seller.SellerProfile)
-admin.site.register(staff.StaffProfile)
+@admin.register(CustomerProfile)
+class CustomerProfileAdmin(admin.ModelAdmin):
+    inlines = [AddressInline]
+
+@admin.register(SellerProfile)
+class SellerProfileAdmin(admin.ModelAdmin):
+    inlines = [AddressInline]
+
+@admin.register(StaffProfile)
+class StaffProfileAdmin(admin.ModelAdmin):
+    inlines = [AddressInline]

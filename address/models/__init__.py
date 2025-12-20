@@ -1,1 +1,1 @@
-from . import address
+from .address import Address

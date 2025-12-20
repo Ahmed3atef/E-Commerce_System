@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericRelation
+from address.models import Address
 import uuid
 
 
@@ -19,6 +21,8 @@ class StaffProfile(models.Model):
     employee_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     is_active_staff = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    address = GenericRelation(Address, related_query_name="staff_profile")
     
     def __str__(self):
         return f"{self.user.email} - {self.department}"

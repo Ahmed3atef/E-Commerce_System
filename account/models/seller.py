@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericRelation
+from address.models import Address
 
 
 User = settings.AUTH_USER_MODEL
@@ -29,6 +31,8 @@ class SellerProfile(models.Model):
     suspended_reason = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    address = GenericRelation(Address, related_query_name="seller_profile")
     
     class Meta:
         indexes = [

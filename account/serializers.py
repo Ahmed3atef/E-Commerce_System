@@ -9,13 +9,20 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
 
 
 class SellerProfileSerializer(serializers.ModelSerializer):
+    address = AddressSerializer(many=True, read_only=True)
     class Meta:
         model = SellerProfile
-        fields = ['user', 'avatar', 'seller_type', 'is_verified', 'onboarding_completed', 'verified_at', 'rejected_reason', 'display_name', 'support_email', 'support_phone', 'is_suspended', 'suspended_reason', 'created_at', 'updated_at']        
+        fields = [
+            'id', 'user', 'avatar', 'seller_type', 'is_verified', 'onboarding_completed', 
+            'verified_at', 'rejected_reason', 'display_name', 'support_email', 
+            'support_phone', 'is_blocked', 'blocked_reason', 'preferred_language',
+            'address', 'created_at', 'updated_at'
+        ]
         
         
 
 class StaffProfileSerializer(serializers.ModelSerializer):
+    address = AddressSerializer(many=True, read_only=True)
     class Meta:
         model = StaffProfile
-        fields = ['user', 'avatar', 'department', 'job_title', 'employee_id', 'is_active_staff', 'created_at']
+        fields = ['id', 'user', 'avatar', 'department', 'job_title', 'employee_id', 'is_active_staff', 'address', 'created_at']

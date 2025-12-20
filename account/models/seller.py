@@ -27,8 +27,10 @@ class SellerProfile(models.Model):
     support_phone = models.CharField(max_length=20, blank=True)
     
      # Risk control
-    is_suspended = models.BooleanField(default=False)
-    suspended_reason = models.TextField(blank=True)
+    is_blocked = models.BooleanField(default=False)
+    blocked_reason = models.TextField(blank=True)
+    preferred_language = models.CharField(max_length=10, default="en")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -36,7 +38,7 @@ class SellerProfile(models.Model):
     
     class Meta:
         indexes = [
-            models.Index(fields=["is_verified", "is_suspended"]),
+            models.Index(fields=["is_verified", "is_blocked"]),
         ]
     
     def __str__(self):

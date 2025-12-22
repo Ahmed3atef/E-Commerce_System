@@ -55,7 +55,7 @@ jobs:
             - name: Run Tests
               env:
                   SECRET_KEY: "&a*46%n5+7zrv9#kbkd0a&p_#z=%)551r0&ror5i1lex*)o$yb"
-                  DJANGO_SETTINGS_MODULE: ECOMMERCE.settings
+                  DJANGO_SETTINGS_MODULE: ECOMMERCE.settings.dev
             
               run: |
                   uv run pytest

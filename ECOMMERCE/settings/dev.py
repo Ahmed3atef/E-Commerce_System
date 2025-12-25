@@ -23,7 +23,7 @@ INSTALLED_APPS.extend([
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-if os.environ.get('ON_Render'):
+if os.environ.get('ON_PYTHONANYWHERE'):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
@@ -76,7 +76,7 @@ else:
     EMAIL_HOST_PASSWORD = ''
 
 
-if os.environ.get('ON_Render'):
+if os.environ.get('ON_PYTHONANYWHERE'):
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",

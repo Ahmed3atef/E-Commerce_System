@@ -23,15 +23,15 @@ INSTALLED_APPS.extend([
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-if os.environ.get('ON_PYTHONANYWHERE'):
+if os.environ.get('TEST_HOSTING_SERVER'):
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'ahmed3atef$ecommerce',
-            'HOST': 'ahmed3atef.mysql.pythonanywhere-services.com',
-            'USER':'ahmed3atef',
-            'PASSWORD':'TESTserver123',
-            'PORT': 3306
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'koyebdb',
+            'USER': 'eco_admin',
+            'PASSWORD': 'npg_newPhpj7LD9Y',
+            'HOST': 'ep-sweet-heart-ag7q7eki.c-2.eu-central-1.pg.koyeb.app',
+            'OPTIONS': {'sslmode': 'require'},
         }
     }
 else:
@@ -57,7 +57,7 @@ SPECTACULAR_SETTINGS = {
 }
 
 
-if os.environ.get('ON_PYTHONANYWHERE'):
+if os.environ.get('TEST_HOSTING_SERVER'):
     # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = 'smtp.gmail.com'
@@ -76,11 +76,11 @@ else:
     EMAIL_HOST_PASSWORD = ''
 
 
-if os.environ.get('ON_PYTHONANYWHERE'):
+if os.environ.get('TEST_HOSTING_SERVER'):
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": "redis://127.0.0.1:6379/1",
+            "LOCATION": "rediss://default_ro:AssCAAIgcDF0hBzPil9Kh2Ym95R2mFI0-1R0lBC2tll6dG37mzJ9zA@handy-marlin-51970.upstash.io:6379",
             "OPTIONS": {
                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
             }

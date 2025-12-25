@@ -1,13 +1,18 @@
 from .common import *
 
 
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # https://djecrety.ir
-SECRET_KEY = 'django-insecure-in1jq^2c@b-tl79+8z1=sliv_4jh4vt*j7#2@p$h!)e6hu*w7u'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-in1jq^2c@b-tl79+8z1=sliv_4jh4vt*j7#2@p$h!)e6hu*w7u')
 
-ALLOWED_HOSTS = ["*"]
+
+if os.environ.get('TEST_HOSTING_SERVER'):
+    ALLOWED_HOSTS = [".koyeb.app", "localhost", "127.0.0.1"]
+    CSRF_TRUSTED_ORIGINS = ["https://*.koyeb.app"]
+else:
+    ALLOWED_HOSTS = ["*"]
 
 INTERNAL_IPS = [
     "127.0.0.1",

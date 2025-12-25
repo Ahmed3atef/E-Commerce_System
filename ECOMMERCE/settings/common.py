@@ -38,6 +38,7 @@ INSTALLED_APPS.extend(LOCAL_APPS)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -111,6 +112,16 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # Media files
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 
 REST_FRAMEWORK = {

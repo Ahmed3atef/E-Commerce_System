@@ -16,6 +16,8 @@ dependencies = [
     "psycopg2-binary>=2.9.11",
     "pycountry>=24.6.1",
     "redis>=7.1.0",
+    "whitenoise>=6.9.0",
+    "gunicorn>=23.0.0",
 ]
 
 [dependency-groups]

@@ -176,11 +176,13 @@ dependencies = [
     { name = "djangorestframework" },
     { name = "djangorestframework-simplejwt" },
     { name = "drf-spectacular" },
+    { name = "gunicorn" },
     { name = "mysqlclient" },
     { name = "pillow" },
     { name = "psycopg2-binary" },
     { name = "pycountry" },
     { name = "redis" },
+    { name = "whitenoise" },
 ]
 
 [package.dev-dependencies]
@@ -200,11 +202,13 @@ requires-dist = [
     { name = "djangorestframework", specifier = ">=3.16.1" },
     { name = "djangorestframework-simplejwt", specifier = ">=5.5.1" },
     { name = "drf-spectacular", specifier = ">=0.29.0" },
+    { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "mysqlclient", specifier = ">=2.2.7" },
     { name = "pillow", specifier = ">=12.0.0" },
     { name = "psycopg2-binary", specifier = ">=2.9.11" },
     { name = "pycountry", specifier = ">=24.6.1" },
     { name = "redis", specifier = ">=7.1.0" },
+    { name = "whitenoise", specifier = ">=6.9.0" },
 ]
 
 [package.metadata.requires-dev]
@@ -214,6 +218,18 @@ dev = [
     { name = "pytest-cov", specifier = ">=7.0.0" },
     { name = "pytest-django", specifier = ">=4.11.1" },
     { name = "pytest-watch", specifier = ">=4.2.0" },
+]
+
+[[package]]
+name = "gunicorn"
+version = "23.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "packaging" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/34/72/9614c465dc206155d93eff0ca20d42e1e35afc533971379482de953521a4/gunicorn-23.0.0.tar.gz", hash = "sha256:f014447a0101dc57e294f6c18ca6b40227a4c90e9bdb586042628030cba004ec", size = 375031, upload-time = "2024-08-10T20:25:27.378Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cb/7d/6dac2a6e1eba33ee43f318edbed4ff29151a49b5d37f080aad1e6469bca4/gunicorn-23.0.0-py3-none-any.whl", hash = "sha256:ec400d38950de4dfd418cff8328b2c8faed0edb0d517d3394e457c317908ca4d", size = 85029, upload-time = "2024-08-10T20:25:24.996Z" },
 ]
 
 [[package]]
@@ -546,4 +562,13 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/07/f6/d0e5b343768e8bcb4cda79f0f2f55051bf26177ecd5651f84c07567461cf/watchdog-6.0.0-py3-none-win32.whl", hash = "sha256:07df1fdd701c5d4c8e55ef6cf55b8f0120fe1aef7ef39a1c6fc6bc2e606d517a", size = 79065, upload-time = "2024-11-01T14:07:09.525Z" },
     { url = "https://files.pythonhosted.org/packages/db/d9/c495884c6e548fce18a8f40568ff120bc3a4b7b99813081c8ac0c936fa64/watchdog-6.0.0-py3-none-win_amd64.whl", hash = "sha256:cbafb470cf848d93b5d013e2ecb245d4aa1c8fd0504e863ccefa32445359d680", size = 79070, upload-time = "2024-11-01T14:07:10.686Z" },
     { url = "https://files.pythonhosted.org/packages/33/e8/e40370e6d74ddba47f002a32919d91310d6074130fe4e17dabcafc15cbf1/watchdog-6.0.0-py3-none-win_ia64.whl", hash = "sha256:a1914259fa9e1454315171103c6a30961236f508b9b623eae470268bbcc6a22f", size = 79067, upload-time = "2024-11-01T14:07:11.845Z" },
+]
+
+[[package]]
+name = "whitenoise"
+version = "6.11.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/15/95/8c81ec6b6ebcbf8aca2de7603070ccf37dbb873b03f20708e0f7c1664bc6/whitenoise-6.11.0.tar.gz", hash = "sha256:0f5bfce6061ae6611cd9396a8231e088722e4fc67bc13a111be74c738d99375f", size = 26432, upload-time = "2025-09-18T09:16:10.995Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6c/e9/4366332f9295fe0647d7d3251ce18f5615fbcb12d02c79a26f8dba9221b3/whitenoise-6.11.0-py3-none-any.whl", hash = "sha256:b2aeb45950597236f53b5342b3121c5de69c8da0109362aee506ce88e022d258", size = 20197, upload-time = "2025-09-18T09:16:09.754Z" },
 ]

@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
+from django.http import HttpResponse
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from debug_toolbar.toolbar import debug_toolbar_urls
 
@@ -16,8 +17,7 @@ urlpatterns = [
     path("api/account/", include("account.urls")),
     path("api/store/", include("store.urls")),
     path("api/product/", include("product.urls")),
-    
-    
+    path('health/', lambda r: HttpResponse('OK'), name='health'),
 ]
 
 if settings.DEBUG:

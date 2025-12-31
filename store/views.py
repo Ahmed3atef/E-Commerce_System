@@ -8,6 +8,7 @@ from .permissions import IsStoreOwner, IsStaffUser
 
 class StoreViewSet(viewsets.ModelViewSet):
     queryset = Store.objects.all()
+    # update this to hide sensitive info from be in get request 
     serializer_class = StoreSerializer
     
     def get_permissions(self):

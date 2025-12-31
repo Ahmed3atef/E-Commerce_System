@@ -7,8 +7,7 @@ from account.models import SellerProfile, CustomerProfile
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 from django.contrib.auth.tokens import default_token_generator
-from .utils import email_verification_token_generator, generate_2fa_code, verify_2fa_code
-from django.core.mail import send_mail
+from .utils import email_verification_token_generator, send_2fa_code, verify_2fa_code
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.settings import api_settings
 from django.contrib.auth.models import update_last_login
@@ -41,14 +40,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             raise serializers.ValidationError({"detail": "No active account found with the given credentials"})
         # Check 2FA
         if self.user.is_2fa_enabled:
-            code = generate_2fa_code(self.user.id)
-            send_mail(
-                "Your 2FA Login Code",
-                f"Your verification code is: {code}",
-                "noreply@ecommerce.com",
-                [self.user.email],
-                fail_silently=True,
-            )
+            send_2fa_code(self.user.id, self.user.email)
             return {
                 "requires_2fa": True,
                 "user_id": self.user.id,

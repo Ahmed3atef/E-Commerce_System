@@ -1,5 +1,7 @@
 import random
+import os
 from django.core.cache import cache
+from django.core.mail import send_mail
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 class EmailVerificationTokenGenerator(PasswordResetTokenGenerator):
@@ -35,3 +37,13 @@ def verify_2fa_code(user_id, code):
 
 
 
+
+def send_2fa_code(user_id, email):
+    code = generate_2fa_code(user_id)
+    send_mail(
+        "Your 2FA Login Code",
+        f"Your verification code is: {code}",
+       os.environ.get('EMAIL_HOST_USER'),
+        [email],
+        fail_silently=False,
+    )

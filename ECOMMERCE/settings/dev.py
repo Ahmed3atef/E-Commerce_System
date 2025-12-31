@@ -32,10 +32,10 @@ if os.environ.get('TEST_HOSTING_SERVER'):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'koyebdb',
-            'USER': 'eco_admin',
-            'PASSWORD': 'npg_newPhpj7LD9Y',
-            'HOST': 'ep-sweet-heart-ag7q7eki.c-2.eu-central-1.pg.koyeb.app',
+            'NAME': os.environ.get('DB_NAME'),
+            'USER': os.environ.get('DB_USER'),
+            'PASSWORD': os.environ.get('DB_PASSWORD'),
+            'HOST': os.environ.get('DB_HOST'),
             'OPTIONS': {'sslmode': 'require'},
         }
     }
@@ -85,7 +85,7 @@ if os.environ.get('TEST_HOSTING_SERVER'):
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": "rediss://default_ro:AssCAAIgcDF0hBzPil9Kh2Ym95R2mFI0-1R0lBC2tll6dG37mzJ9zA@handy-marlin-51970.upstash.io:6379",
+            "LOCATION": os.environ.get('REDIS_URL'),
             "OPTIONS": {
                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
             }

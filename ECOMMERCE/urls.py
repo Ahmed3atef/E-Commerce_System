@@ -21,6 +21,7 @@ urlpatterns = [
     path("api/store/", include("store.urls")),
     path("api/order/", include("order.urls")),
     path("api/discount/", include("discount.urls")),
+    path("api/analytics/", include("analytics.urls")),
     path("api/product/", include("product.urls")),
     path('health/', lambda r: HttpResponse('OK'), name='health'),
 ]

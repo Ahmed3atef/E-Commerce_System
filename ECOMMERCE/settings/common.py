@@ -31,6 +31,7 @@ LOCAL_APPS = [
     'product.apps.ProductConfig',
     'order.apps.OrderConfig',
     'discount.apps.DiscountConfig',
+    'analytics.apps.AnalyticsConfig',
 ]
 
 INSTALLED_APPS.extend(EXTERNAL_APPS)

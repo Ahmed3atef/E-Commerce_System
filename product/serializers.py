@@ -16,11 +16,21 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'store', 'store_name', 'category', 'category_name', 
             'name', 'slug', 'description', 'price', 'compare_at_price', 
-            'stock_quantity', 'is_active', 'is_approved', 'created_at', 'update_at'
+            'stock_quantity', 'is_active', 'is_approved', 'approved_at', 
+            'rejection_reason', 'created_at', 'update_at'
         ]
-        read_only_fields = ['slug', 'is_approved', 'store']
+        read_only_fields = ['slug', 'is_approved', 'approved_at', 'rejection_reason', 'store']
 
     def validate(self, attrs):
-        user = self.context['request'].user
         # Store is validated in perform_create of the viewset usually
+        return attrs
+
+class ProductApprovalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['is_approved', 'rejection_reason']
+
+    def validate(self, attrs):
+        if not attrs.get('is_approved') and not attrs.get('rejection_reason'):
+            raise serializers.ValidationError({"rejection_reason": "Required if rejecting the product."})
         return attrs

@@ -5,6 +5,8 @@ from drf_spectacular.utils import extend_schema, OpenApiResponse
 from .models import Coupon, ProductDiscount
 from .serializers import CouponSerializer, ProductDiscountSerializer, CouponApplySerializer
 from django.utils import timezone
+from django.db import models
+from .permissions import IsCouponOwnerOrStaff, IsVerifiedSeller
 
 @extend_schema(tags=['Discounts'])
 class CouponViewSet(viewsets.ModelViewSet):
@@ -18,16 +20,18 @@ class CouponViewSet(viewsets.ModelViewSet):
         if user.is_staff:
             return Coupon.objects.all()
         if hasattr(user, 'seller_profile'):
-            return Coupon.objects.filter(store__seller=user.seller_profile)
-        # Customers can only "see" active global coupons or maybe through a specific apply endpoint
+            return Coupon.objects.filter(models.Q(store__seller=user.seller_profile) | models.Q(store=None))
+        
         return Coupon.objects.filter(is_active=True, store=None)
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'apply']:
             return [permissions.IsAuthenticated()]
-        if self.action == 'apply':
-            return [permissions.IsAuthenticated()]
-        return [permissions.IsAdminUser() | permissions.IsAuthenticated()] # Simplified, should be more granular
+        if self.action == 'create':
+            return [IsVerifiedSeller()]
+        if self.action in ['update', 'partial_update', 'destroy']:
+            return [IsCouponOwnerOrStaff()]
+        return [permissions.IsAdminUser()]
 
     @extend_schema(
         summary="Validate and apply coupon",

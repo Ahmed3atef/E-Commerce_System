@@ -127,3 +127,12 @@ class TestProductAPI:
         product.refresh_from_db()
         assert product.is_approved is False
         assert product.rejection_reason == "Policy violation"
+
+    def test_delete_product_owner_only(self, api_client, product_owner, approved_store):
+        product = Product.objects.create(store=approved_store, name="To Delete", price=10.00)
+        api_client.force_authenticate(user=product_owner)
+        
+        url = reverse("product:product-detail", kwargs={"pk": product.pk})
+        response = api_client.delete(url)
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert not Product.objects.filter(pk=product.pk).exists()

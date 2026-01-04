@@ -42,3 +42,15 @@ class TestCategoryAPI:
         response = api_client.get(url)
         assert response.status_code == status.HTTP_200_OK
         assert response.data["name"] == "Toys"
+
+    def test_delete_category_as_admin(self, api_client):
+        category = Category.objects.create(name="To Delete", slug="to-delete")
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        admin_user = User.objects.create(email="admin_del@test.com", is_staff=True, role="staff")
+        api_client.force_authenticate(user=admin_user)
+        
+        url = reverse("product:category-detail", kwargs={"pk": category.pk})
+        response = api_client.delete(url)
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert not Category.objects.filter(pk=category.pk).exists()

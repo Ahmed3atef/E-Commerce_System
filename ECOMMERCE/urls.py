@@ -6,10 +6,13 @@ from django.http import HttpResponse
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from debug_toolbar.toolbar import debug_toolbar_urls
 
+from core.views import home
+
 
 admin.site.site_header = "Ecommerce System"
 
 urlpatterns = [
+    path('', home, name='home'),
     path('admin/', admin.site.urls),
     
     #auth

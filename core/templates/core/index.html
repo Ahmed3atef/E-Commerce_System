@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>E-Commerce System API | Home</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            :root {
+                --primary: #6366f1;
+                --primary-hover: #4f46e5;
+                --bg-dark: #0f172a;
+                --card-bg: rgba(30, 41, 59, 0.7);
+                --text-main: #f8fafc;
+                --text-muted: #94a3b8;
+                --glass-border: rgba(255, 255, 255, 0.1);
+            }
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: "Outfit", sans-serif;
+            }
+
+            body {
+                background-color: var(--bg-dark);
+                color: var(--text-main);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                background-image: radial-gradient(
+                        circle at 10% 20%,
+                        rgba(99, 102, 241, 0.15) 0%,
+                        transparent 40%
+                    ),
+                    radial-gradient(
+                        circle at 90% 80%,
+                        rgba(79, 70, 229, 0.15) 0%,
+                        transparent 40%
+                    );
+                overflow-x: hidden;
+            }
+
+            .container {
+                max-width: 1000px;
+                width: 90%;
+                text-align: center;
+                z-index: 1;
+            }
+
+            .hero h1 {
+                font-size: 4rem;
+                font-weight: 800;
+                margin-bottom: 1rem;
+                background: linear-gradient(to right, #818cf8, #c084fc);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                letter-spacing: -0.02em;
+            }
+
+            .hero p {
+                font-size: 1.25rem;
+                color: var(--text-muted);
+                margin-bottom: 3rem;
+                max-width: 600px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 2rem;
+                margin-bottom: 4rem;
+            }
+
+            .card {
+                background: var(--card-bg);
+                backdrop-filter: blur(12px);
+                border: 1px solid var(--glass-border);
+                border-radius: 24px;
+                padding: 2.5rem;
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                position: relative;
+                overflow: hidden;
+                text-decoration: none;
+                color: inherit;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .card:hover {
+                transform: translateY(-10px);
+                border-color: var(--primary);
+                box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5),
+                    0 0 20px -5px rgba(99, 102, 241, 0.3);
+            }
+
+            .card::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 4px;
+                background: linear-gradient(
+                    to right,
+                    transparent,
+                    var(--primary),
+                    transparent
+                );
+                transform: translateX(-100%);
+                transition: transform 0.6s ease;
+            }
+
+            .card:hover::before {
+                transform: translateX(100%);
+            }
+
+            .icon {
+                width: 64px;
+                height: 64px;
+                background: rgba(99, 102, 241, 0.1);
+                border-radius: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 1.5rem;
+                color: var(--primary);
+                font-size: 2rem;
+            }
+
+            .card h2 {
+                font-size: 1.5rem;
+                margin-bottom: 0.75rem;
+                font-weight: 600;
+            }
+
+            .card p {
+                color: var(--text-muted);
+                font-size: 0.95rem;
+                line-height: 1.6;
+            }
+
+            .footer {
+                margin-top: auto;
+                padding: 2rem;
+                color: var(--text-muted);
+                font-size: 0.875rem;
+            }
+
+            .admin-link {
+                display: inline-flex;
+                align-items: center;
+                margin-top: 2rem;
+                color: var(--text-muted);
+                text-decoration: none;
+                font-weight: 500;
+                transition: color 0.3s ease;
+            }
+
+            .admin-link:hover {
+                color: var(--primary);
+            }
+
+            /* Micro-animations */
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .hero {
+                animation: fadeIn 0.8s ease-out;
+            }
+            .grid > *:nth-child(1) {
+                animation: fadeIn 0.8s ease-out 0.2s both;
+            }
+            .grid > *:nth-child(2) {
+                animation: fadeIn 0.8s ease-out 0.4s both;
+            }
+            .grid > *:nth-child(3) {
+                animation: fadeIn 0.8s ease-out 0.6s both;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="hero">
+                <h1>E-Commerce System</h1>
+                <p>
+                    A robust, scalable API for modern commerce. Explore our
+                    documentation and start building.
+                </p>
+            </div>
+
+            <div class="grid">
+                <a
+                    href="/api/schema/swagger-ui/"
+                    class="card"
+                    id="swagger-card"
+                >
+                    <div class="icon">⚡</div>
+                    <h2>Swagger UI</h2>
+                    <p>
+                        Interactive API exploration and testing. The easiest way
+                        to visualize and interact with our endpoints.
+                    </p>
+                </a>
+
+                <a href="/api/schema/redoc/" class="card" id="redoc-card">
+                    <div class="icon">📚</div>
+                    <h2>Redoc</h2>
+                    <p>
+                        Beautiful, clean, and organized documentation. Perfect
+                        for reading and understanding our data structures.
+                    </p>
+                </a>
+
+                <a href="/admin/" class="card" id="admin-card">
+                    <div class="icon">🛠️</div>
+                    <h2>Admin Panel</h2>
+                    <p>
+                        Manage products, stores, and users. Our powerful
+                        administrative interface for full system control.
+                    </p>
+                </a>
+            </div>
+
+            <a href="/health/" class="admin-link">
+                System Health Check &rarr;
+            </a>
+        </div>
+
+        <footer class="footer">
+            &copy; 2026 E-Commerce System API. Built with Django & DRF
+            Spectacular.
+        </footer>
+    </body>
+</html>

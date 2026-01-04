@@ -11,15 +11,32 @@ class ProductSerializer(serializers.ModelSerializer):
     store_name = serializers.ReadOnlyField(source='store.name')
     category_name = serializers.ReadOnlyField(source='category.name')
     
+    current_price = serializers.SerializerMethodField()
+    discount_info = serializers.SerializerMethodField()
+
     class Meta:
         model = Product
         fields = [
             'id', 'store', 'store_name', 'category', 'category_name', 
             'name', 'slug', 'description', 'price', 'compare_at_price', 
+            'current_price', 'discount_info',
             'stock_quantity', 'is_active', 'is_approved', 'approved_at', 
             'rejection_reason', 'created_at', 'update_at'
         ]
         read_only_fields = ['slug', 'is_approved', 'approved_at', 'rejection_reason', 'store']
+
+    def get_current_price(self, obj):
+        return obj.get_discounted_price()
+
+    def get_discount_info(self, obj):
+        discount = obj.get_active_discount()
+        if discount:
+            return {
+                "name": discount.name,
+                "value": discount.value,
+                "type": discount.discount_type
+            }
+        return None
 
     def validate(self, attrs):
         # Store is validated in perform_create of the viewset usually

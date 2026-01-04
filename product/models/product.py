@@ -38,6 +38,40 @@ class Product(models.Model):
             )
         ]
         ordering = ["-created_at"]
+
+    def get_active_discount(self):
+        from discount.models import ProductDiscount
+        from django.utils import timezone
+        now = timezone.now()
+        
+        # Check direct product discounts
+        discount = self.discounts.filter(
+            is_active=True, start_date__lte=now, end_date__gte=now
+        ).order_by('-priority', '-start_date').first()
+        
+        if discount:
+            return discount
+            
+        # Check category discounts
+        if self.category:
+            discount = self.category.discounts.filter(
+                is_active=True, start_date__lte=now, end_date__gte=now
+            ).order_by('-priority', '-start_date').first()
+            return discount
+            
+        return None
+
+    def get_discounted_price(self):
+        from decimal import Decimal
+        discount = self.get_active_discount()
+        price = Decimal(str(self.price))
+        if not discount:
+            return price
+            
+        discount_value = Decimal(str(discount.value))
+        if discount.discount_type == 'percentage':
+            return price * (Decimal('1') - discount_value / Decimal('100'))
+        return max(Decimal('0'), price - discount_value)
         
         
     def save(self, *args, **kwargs):

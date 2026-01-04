@@ -19,6 +19,8 @@ urlpatterns = [
     path("api/auth/", include("account.auth.urls")),
     path("api/account/", include("account.urls")),
     path("api/store/", include("store.urls")),
+    path("api/order/", include("order.urls")),
+    path("api/discount/", include("discount.urls")),
     path("api/product/", include("product.urls")),
     path('health/', lambda r: HttpResponse('OK'), name='health'),
 ]
